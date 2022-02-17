@@ -83,11 +83,11 @@ const { getBuildSizes, formatBytes } = require("build-sizes");
 })();
 ```
 
-### Reference
+## Reference
 
 Descriptions, parameters, and return values for the exported functions.
 
-#### getBuildSizes
+### getBuildSizes
 
 Provides sizes for an application's production build.
 
@@ -103,7 +103,7 @@ The function returns a `Promise` which resolves an object with three properties.
 | buildSize       | size in bytes of all files in the build directory   | number |
 | buildFileCount  | count of all files in the build directory           | number |
 
-#### formatBytes
+### formatBytes
 
 Formats bytes to a human readable size.
 
@@ -115,7 +115,7 @@ Formats bytes to a human readable size.
 
 The function returns a `string` of a human readable size with units.
 
-#### getFiles
+### getFiles
 
 Returns all files in a directory (recursively).
 
