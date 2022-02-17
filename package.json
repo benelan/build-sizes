@@ -1,6 +1,6 @@
 {
   "name": "build-sizes",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Provides build sizes for your application",
   "keywords": [
     "metrics",

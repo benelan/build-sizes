@@ -18,7 +18,7 @@ npm i -D build-sizes
 
 ## Usage
 
-The run the script, you need to provide the path to the application's build directory. For example, `create-react-app` creates a directory named `build` for production. Once the production build completes, you can get the sizes by running:
+To run the script, you need to provide the path from the current working directory to the application's build directory. For example, `create-react-app` generates a directory named `build` for production. Once the application is built, you can get the sizes by running the following from the application's root directory:
 
 ```bash
 build-sizes build
@@ -36,14 +36,13 @@ On-disk files: 419
 -------------------------------
 ```
 
-Other common names frameworks use for production are `dist` and `public`.
+Other common directory names frameworks use for production builds are `dist` and `public`.
 
 ### Running from an NPM script
 
 You can get the sizes after every build by adding a `postbuild` NPM script:
 
 ```diff
-...
  "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -58,14 +57,14 @@ The sizes will be logged to the console after running `npm run build`.
 
 ### Using the function
 
-The package also exports an asynchronous function. To use the function:
+The package also exports an asynchronous function:
 
 ```js
 const { getBuildSizes } = require("build-sizes");
 
 (async () => {
     try {
-        const buildSizes = await getBuildSizes("dist/prod");
+        const buildSizes = await getBuildSizes("your-app/build-path");
         console.log(buildSizes)
         ...
     } catch (err) {
@@ -81,7 +80,7 @@ The function requires one parameter.
 
 | Parameter | Description                                                                      | Type   |
 | --------- | -------------------------------------------------------------------------------- | ------ |
-| buildPath | path from the current working directory (`$PWD`) to the sample's build directory | string |
+| buildPath | path from the current working directory to the sample's build directory | string |
 
 #### Return properties
 

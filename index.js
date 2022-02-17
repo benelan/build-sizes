@@ -9,7 +9,7 @@ const {
  * @param {string} buildPath - path to the build directory
  * @returns {Promise<{path: string, name: string}>} file path and name
  */
-const getFiles = async (buildPath = "./") => {
+const getFiles = async (buildPath) => {
   const entries = await readdir(buildPath, { withFileTypes: true });
   const files = entries
     .filter((file) => !file.isDirectory())
@@ -57,7 +57,7 @@ const convertBytes = (bytes) => {
  * - buildFileCount - count of all files in the build directory
  */
 const getBuildSizes = async (buildPath) => {
-  const build = resolve(process.env.PWD, buildPath);
+  const build = resolve(process.cwd(), buildPath);
 
   const buildFiles = await getFiles(build);
 
