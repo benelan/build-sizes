@@ -6,19 +6,19 @@ const {
 
 /**
  * Returns all files in a directory (recursively)
- * @param {string} buildPath - path to the build directory
- * @returns {Promise<{path: string, name: string}>} file path and name
+ * @param {string} directoryPath - path to the build directory
+ * @returns {Promise<{path: string, name: string}[]>} file path and name
  */
-const getFiles = async (buildPath) => {
-  const entries = await readdir(buildPath, { withFileTypes: true });
+const getFiles = async (directoryPath) => {
+  const entries = await readdir(directoryPath, { withFileTypes: true });
   const files = entries
     .filter((file) => !file.isDirectory())
-    .map((file) => ({ ...file, path: resolve(buildPath, file.name) }));
+    .map((file) => ({ ...file, path: resolve(directoryPath, file.name) }));
   const directories = entries.filter((folder) => folder.isDirectory());
 
   for (const directory of directories) {
     const subdirectoryFiles = await getFiles(
-      resolve(buildPath, directory.name)
+      resolve(directoryPath, directory.name)
     );
     files.push(...subdirectoryFiles);
   }
@@ -26,34 +26,30 @@ const getFiles = async (buildPath) => {
 };
 
 /**
- * Converts bytes to a human readable format
+ * Formats bytes to a human readable size
  * @param {number} bytes - the byte file size to convert
- * @returns human readable file size
+ * @param {number} [decimals=2] - number of decimal points to round
+ * @param {boolean} [binary=true] - binary or decimal conversion
+ * @returns human readable file size with units
  */
-const convertBytes = (bytes) => {
-  const sizeUnits = ["Bytes", "KB", "MB", "GB", "TB"];
 
-  if (bytes == 0) {
-    return "n/a";
-  }
+const formatBytes = (bytes, decimals = 2, binary = true) => {
+  if (bytes === 0) return "0 Bytes";
 
-  const unitIndex = Math.floor(Math.log(bytes) / Math.log(1024));
+  const unitSizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const k = binary ? 1024 : 1000; // binary vs decimal conversion
+  const d = decimals < 0 ? 0 : decimals;
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  if (unitIndex == 0) {
-    return `${bytes} ${sizeUnits[unitIndex]}`;
-  }
-
-  return `${(bytes / Math.pow(1024, unitIndex)).toFixed(2)} ${
-    sizeUnits[unitIndex]
-  }`;
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${unitSizes[i]}`;
 };
 
 /**
  * Provides sizes for an application's production build
  * @param {string} buildPath - path from the current working directory to the build directory
- * @returns {Promise<{ mainBundleSize: string, buildSize:string , buildFileCount: string}>}
- * - mainBundleSize - size in megabytes of the largest JavaScript bundle file
- * - buildSize - size in megabytes of all files in the build directory
+ * @returns {Promise<{ mainBundleSize: number, buildSize:number, buildFileCount: number}>}
+ * - mainBundleSize - size in bytes of the largest JavaScript bundle file
+ * - buildSize - size in bytes of all files in the build directory
  * - buildFileCount - count of all files in the build directory
  */
 const getBuildSizes = async (buildPath) => {
@@ -61,27 +57,23 @@ const getBuildSizes = async (buildPath) => {
 
   const buildFiles = await getFiles(build);
 
-  const mainBundleSize = convertBytes(
-    Math.max(
-      ...(await Promise.all(
-        buildFiles
-          .filter((file) => /.js$/.test(file.name))
-          .map(async (file) => (await stat(file.path)).size)
-      ))
-    )
+  const mainBundleSize = Math.max(
+    ...(await Promise.all(
+      buildFiles
+        .filter((file) => /.js$/.test(file.name))
+        .map(async (file) => (await stat(file.path)).size)
+    ))
   );
 
-  const buildSize = convertBytes(
-    (
-      await Promise.all(
-        buildFiles.map(async (file) => (await stat(file.path)).size)
-      )
-    ).reduce((count, fileSize) => count + fileSize, 0)
-  );
+  const buildSize = (
+    await Promise.all(
+      buildFiles.map(async (file) => (await stat(file.path)).size)
+    )
+  ).reduce((count, fileSize) => count + fileSize, 0);
 
   const buildFileCount = buildFiles.length;
 
   return { mainBundleSize, buildSize, buildFileCount };
 };
 
-module.exports = { getBuildSizes };
+module.exports = { getBuildSizes, getFiles, formatBytes };

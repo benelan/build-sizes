@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { getBuildSizes } = require("../index.js");
+const { getBuildSizes, formatBytes } = require("../index.js");
 
 /**
  * Emphasizes a message in the console
@@ -26,9 +26,16 @@ const logHeader = (message) => {
 
     const headerText = "Application Build Sizes";
     logHeader(headerText);
+
     console.log(
-      `Main bundle size: ${mainBundleSize}\nOn-disk size: ${buildSize}\nOn-disk files: ${buildFileCount}`
+      "Main bundle size: ",
+      formatBytes(mainBundleSize),
+      "\nOn-disk size: ",
+      formatBytes(buildSize),
+      "\nOn-disk files: ",
+      buildFileCount
     );
+
     console.log("-".repeat(headerText.length + 8));
   } catch (err) {
     console.error(err);

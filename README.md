@@ -1,6 +1,6 @@
 # Build sizes
 
-A small script which provides sizes of a production build. 
+A small script that provides sizes of production builds to assist with optimization.
 
 ## Installation
 
@@ -36,7 +36,7 @@ On-disk files: 419
 -------------------------------
 ```
 
-Other common directory names frameworks use for production builds are `dist` and `public`.
+Other common directory names used by frameworks for production builds are `dist` and `public`.
 
 ### Running from an NPM script
 
@@ -55,39 +55,77 @@ You can get the sizes after every build by adding a `postbuild` NPM script:
 
 The sizes will be logged to the console after running `npm run build`.
 
-### Using the function
+### Using the functions
 
-The package also exports an asynchronous function:
+The package also exports a few functions. Here is a usage example:
 
 ```js
-const { getBuildSizes } = require("build-sizes");
+const { getBuildSizes, formatBytes } = require("build-sizes");
 
 (async () => {
-    try {
-        const buildSizes = await getBuildSizes("your-app/build-path");
-        console.log(buildSizes)
-        ...
-    } catch (err) {
-        console.error(err);
-        process.exitCode = 1;
-    }
+  try {
+    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
+      "your-app/build-path"
+    );
+
+    console.log(
+      "Main bundle size: ",
+      formatBytes(mainBundleSize),
+      "\nOn-disk size: ",
+      formatBytes(buildSize),
+      "\nOn-disk files: ",
+      buildFileCount
+    );
+  } catch (err) {
+    console.error(err);
+    process.exitCode = 1;
+  }
 })();
 ```
 
-#### Parameters
+### Reference
 
-The function requires one parameter.
+Descriptions, parameters, and return values for the exported functions.
 
-| Parameter | Description                                                                      | Type   |
-| --------- | -------------------------------------------------------------------------------- | ------ |
-| buildPath | path from the current working directory to the sample's build directory | string |
+#### getBuildSizes
 
-#### Return properties
+Provides sizes for an application's production build.
 
-The function returns an object with three properties.
+| Parameter | Description                                                                  | Type   |
+| --------- | ---------------------------------------------------------------------------- | ------ |
+| buildPath | path from the current working directory to the application's build directory | string |
 
-| Property       | Description                                | Type   |
-| -------------- | ------------------------------------------ | ------ |
-| mainBundleSize | size of the largest JavaScript bundle file | number |
-| buildSize      | size of all files in the build directory   | number |
-| fileCount      | count of all files in the build directory  | number |
+The function returns a `Promise` which resolves an object with three properties.
+
+| Return Property | Description                                         | Type   |
+| --------------- | --------------------------------------------------- | ------ |
+| mainBundleSize  | size in bytes of the largest JavaScript bundle file | number |
+| buildSize       | size in bytes of all files in the build directory   | number |
+| buildFileCount  | count of all files in the build directory           | number |
+
+#### formatBytes
+
+Formats bytes to a human readable size.
+
+| Parameter           | Description                                            | Type    |
+| ------------------- | ------------------------------------------------------ | ------- |
+| bytes               | bytes to format into human readable size               | number  |
+| decimals (optional) | number of decimal points for rounding (default is `2`) | number  |
+| binary (optional)   | binary or decimal conversion (default is `true`)       | boolean |
+
+The function returns a `string` of a human readable size with units.
+
+#### getFiles
+
+Returns all files in a directory (recursively).
+
+| Parameter     | Description                                                                   | Type   |
+| ------------- | ----------------------------------------------------------------------------- | ------ |
+| directoryPath | path from the current working directory to the directory containing the files | string |
+
+The function returns a `Promise` which resolves an array of objects with two properties.
+
+| Return Property | Description               | Type   |
+| --------------- | ------------------------- | ------ |
+| path            | absolute path of the file | string |
+| name            | name of the file          | string |
