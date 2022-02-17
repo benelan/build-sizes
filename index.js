@@ -49,21 +49,15 @@ const convertBytes = (bytes) => {
 };
 
 /**
- * Takes an object containing build information and returns an object containing build sizes.
- * The build sizes are logged when the script is ran via CLI.
- * @param {{samplePath: string, buildPath: string}}
- * - samplePath - relative path to the sample's root directory ("$PWD" default)
- * - buildPath - relative path from samplePath to the build directory
+ * Provides sizes for an application's production build
+ * @param {string} buildPath - path from the current working directory to the build directory
  * @returns {Promise<{ mainBundleSize: string, buildSize:string , buildFileCount: string}>}
  * - mainBundleSize - size in megabytes of the largest JavaScript bundle file
  * - buildSize - size in megabytes of all files in the build directory
  * - buildFileCount - count of all files in the build directory
  */
-const getBuildSize = async ({ samplePath, buildPath }) => {
-  const sample = !!samplePath
-    ? resolve(__dirname, samplePath)
-    : process.env.PWD;
-  const build = resolve(sample, buildPath);
+const getBuildSizes = async (buildPath) => {
+  const build = resolve(process.env.PWD, buildPath);
 
   const buildFiles = await getFiles(build);
 
@@ -90,4 +84,4 @@ const getBuildSize = async ({ samplePath, buildPath }) => {
   return { mainBundleSize, buildSize, buildFileCount };
 };
 
-module.exports = { getBuildSize };
+module.exports = { getBuildSizes };

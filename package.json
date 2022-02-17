@@ -1,7 +1,7 @@
 {
   "name": "build-sizes",
-  "version": "1.0.0",
-  "description": "Provides build size for your application",
+  "version": "2.0.0",
+  "description": "Provides build sizes for your application",
   "keywords": [
     "metrics",
     "size",
@@ -13,7 +13,8 @@
     "name": "Ben Elan",
     "url": "https://benelan.dev/"
   },
-  "main": "index.js",
+  "main": "./index.js",
+  "exports": "./index.js",
   "bin": {
     "build-sizes": "bin/build-sizes.js"
   },
@@ -30,5 +31,9 @@
   },
   "bugs": {
     "url": "https://github.com/benelan/build-sizes/issues"
+  },
+  "volta": {
+    "node": "16.14.0",
+    "npm": "8.5.0"
   }
 }

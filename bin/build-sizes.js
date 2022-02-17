@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { getBuildSize } = require("../index.js");
+const { getBuildSizes } = require("../index.js");
 
 /**
  * Emphasizes a message in the console
@@ -12,18 +12,17 @@ const logHeader = (message) => {
 
 (async () => {
   try {
-    const [buildPath, samplePath] = process.argv.splice(2);
+    const [buildPath] = process.argv.splice(2);
 
     if (!buildPath) {
       throw new Error(
-        "Error: Invalid or missing arguments. The path to the build directory is a required."
+        "Error: Invalid or missing arguments. The path from the current working directory to the production build directory is a required."
       );
     }
 
-    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSize({
-      buildPath,
-      samplePath,
-    });
+    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
+      buildPath
+    );
 
     const headerText = "Application Build Sizes";
     logHeader(headerText);
