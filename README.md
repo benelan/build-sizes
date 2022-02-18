@@ -1,6 +1,14 @@
 # Build sizes
 
-A small script that provides sizes of production builds to assist with optimization. The script is available as an [NPM package](https://www.npmjs.com/package/build-sizes))! 🚀 
+<div style="font-size:17px;">
+    A small script that provides production build sizes to assist with optimization.
+</div>
+
+<div align="center" style="margin-top:40px; margin-bottom:10px; font-weight:700;font-size:20px;">
+    🚀 Available as an
+    <a href="https://www.npmjs.com/package/build-sizes" target="_blank" rel="noreferrer noopener">NPM package</a>!
+    🚀
+</div>
 
 ## Installation
 
