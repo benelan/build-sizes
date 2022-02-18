@@ -1,6 +1,6 @@
 # Build sizes
 
-A small script that provides sizes of production builds to assist with optimization.
+A small script that provides sizes of production builds to assist with optimization. The script is available as an [NPM package](https://www.npmjs.com/package/build-sizes))! 🚀 
 
 ## Installation
 
@@ -83,25 +83,31 @@ const { getBuildSizes, formatBytes } = require("build-sizes");
 })();
 ```
 
+
 ## Reference
 
 Descriptions, parameters, and return values for the exported functions.
 
+---
+
 ### getBuildSizes
 
-Provides sizes for an application's production build.
+Gets sizes for an application's production build.
 
 | Parameter | Description                                                                  | Type   |
 | --------- | ---------------------------------------------------------------------------- | ------ |
 | buildPath | path from the current working directory to the application's build directory | string |
 
-The function returns a `Promise` which resolves an object with three properties (`Promise<{ mainBundleSize: number, buildSize:number, buildFileCount: number}>`).
+The function returns a `Promise` which resolves an object with three properties.
+- return type: `Promise<{ mainBundleSize: number, buildSize: number, buildFileCount: number}>`
 
 | Return Property | Description                                         | Type   |
 | --------------- | --------------------------------------------------- | ------ |
 | mainBundleSize  | size in bytes of the largest JavaScript bundle file | number |
 | buildSize       | size in bytes of all files in the build directory   | number |
 | buildFileCount  | count of all files in the build directory           | number |
+
+---
 
 ### formatBytes
 
@@ -113,22 +119,28 @@ Formats bytes to a human readable size.
 | decimals (optional) | decimal precision for rounding(default is `2`)   | number  |
 | binary (optional)   | binary or decimal conversion (default is `true`) | boolean |
 
-The function returns a human readable size with units (`string`).
+The function returns a human readable size with units.
+- return type: `string`
+
+---
 
 ### getFiles
 
-Returns all files in a directory (recursively).
+Gets all files in a directory (recursively).
 
 | Parameter     | Description                                                                   | Type   |
 | ------------- | ----------------------------------------------------------------------------- | ------ |
 | directoryPath | path from the current working directory to the directory containing the files | string |
 
-The function returns a `Promise` which resolves an array of objects with two properties (`Promise<{path: string, name: string}[]>`).
+The function returns a `Promise` which resolves an array of objects with two properties.
+- return type: `Promise<{path: string, name: string}[]>`
 
 | Return Property | Description               | Type   |
 | --------------- | ------------------------- | ------ |
 | path            | absolute path of the file | string |
 | name            | name of the file          | string |
+
+---
 
 ### filterFilesByType
 
@@ -139,7 +151,10 @@ Filters files by filetype.
 | files     | files from the [`getFiles`](#getfiles) function | {path: string, name: string}[] |
 | type      | file type, e.g. "js", "css", "tsx", etc.        | string                         |
 
-The function returns the files filtered by type (`{path: string, name: string}[]`).
+The function returns the files filtered by type.
+- return type: `{path: string, name: string}[]`
+
+---
 
 ### getFileSizes
 
@@ -149,4 +164,8 @@ Gets file sizes.
 | --------- | ----------------------------------------------- | ------------------------------ |
 | files     | files from the [`getFiles`](#getfiles) function | {path: string, name: string}[] |
 
-The function returns a `Promise` which resolves an array of file sizes (`Promise<numbers[]>`).
+
+The function returns a `Promise` which resolves an array of file sizes.
+- return type: `Promise<numbers[]>`
+
+---
