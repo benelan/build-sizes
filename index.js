@@ -6,7 +6,7 @@ const {
 
 /**
  * Returns all files in a directory (recursively)
- * @param {string} directoryPath - path to the build directory
+ * @param {string} directoryPath - path from the current working directory to the directory containing the files
  * @returns {Promise<{path: string, name: string}[]>} file path and name
  */
 const getFiles = async (directoryPath) => {
@@ -14,6 +14,7 @@ const getFiles = async (directoryPath) => {
   const files = entries
     .filter((file) => !file.isDirectory())
     .map((file) => ({ ...file, path: resolve(directoryPath, file.name) }));
+
   const directories = entries.filter((folder) => folder.isDirectory());
 
   for (const directory of directories) {
@@ -27,22 +28,38 @@ const getFiles = async (directoryPath) => {
 
 /**
  * Formats bytes to a human readable size
- * @param {number} bytes - the byte file size to convert
- * @param {number} [decimals=2] - number of decimal points to round
+ * @param {number} bytes - bytes to format into human readable size
+ * @param {number} [decimals=2] - decimal precision for rounding
  * @param {boolean} [binary=true] - binary or decimal conversion
- * @returns human readable file size with units
+ * @returns {string} human readable file size with units
  */
-
 const formatBytes = (bytes, decimals = 2, binary = true) => {
   if (bytes === 0) return "0 Bytes";
 
   const unitSizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const k = binary ? 1024 : 1000; // binary vs decimal conversion
-  const d = decimals < 0 ? 0 : decimals;
+  const d = !decimals || decimals < 0 ? 0 : decimals; // no negative decimal precision
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${unitSizes[i]}`;
 };
+
+/**
+ * Filters files by filetype
+ * @param {{path: string, name: string}[]} files - files from the `getFiles` function
+ * @param {string} type - file type, e.g. "js", "css", "tsx", etc.
+ * @returns {{path: string, name: string}[]} - files filtered by filetype
+ */
+const filterFilesByType = (files, type) =>
+  files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
+
+/**
+ * Gets file sizes
+ * @param {{path: string, name: string}[]} files - files from the `getFiles` function
+ * @returns {Promise<number[]>} sizes of the files
+ */
+const getFileSizes = async (files) =>
+  await Promise.all(files.map(async (file) => (await stat(file.path)).size));
 
 /**
  * Provides sizes for an application's production build
@@ -54,26 +71,26 @@ const formatBytes = (bytes, decimals = 2, binary = true) => {
  */
 const getBuildSizes = async (buildPath) => {
   const build = resolve(process.cwd(), buildPath);
-
   const buildFiles = await getFiles(build);
 
+  // largest javascript file
   const mainBundleSize = Math.max(
-    ...(await Promise.all(
-      buildFiles
-        .filter((file) => /.js$/.test(file.name))
-        .map(async (file) => (await stat(file.path)).size)
-    ))
+    ...(await getFileSizes(filterFilesByType(buildFiles, "js")))
   );
-
-  const buildSize = (
-    await Promise.all(
-      buildFiles.map(async (file) => (await stat(file.path)).size)
-    )
-  ).reduce((count, fileSize) => count + fileSize, 0);
-
+  // sum of file sizes
+  const buildSize = (await getFileSizes(buildFiles)).reduce(
+    (count, fileSize) => count + fileSize,
+    0
+  );
   const buildFileCount = buildFiles.length;
 
   return { mainBundleSize, buildSize, buildFileCount };
 };
 
-module.exports = { getBuildSizes, getFiles, formatBytes };
+module.exports = {
+  getBuildSizes,
+  formatBytes,
+  getFiles,
+  getFileSizes,
+  filterFilesByType,
+};
