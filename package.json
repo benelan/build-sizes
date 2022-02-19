@@ -18,8 +18,13 @@
   "bin": {
     "build-sizes": "bin/build-sizes.js"
   },
+  "files": [
+    "index.js",
+    "bin/**"
+  ],
   "scripts": {
-    "test": "echo \"no test specified\""
+    "test": "echo \"no test specified\"",
+    "docs": "npx jsdoc index.js -r README.md -d docs"
   },
   "engines": {
     "node": ">=12"

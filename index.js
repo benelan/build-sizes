@@ -5,9 +5,22 @@ const {
 } = require("fs");
 
 /**
+ * @typedef {Object} File
+ * @property {string} name - file name
+ * @property {string} path - file path
+ */
+
+/**
+ * @typedef {Object} BuildSizes
+ * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
+ * @property {number} buildSize - size in bytes of all files in the build directory
+ * @property {number} buildFileCount - count of all files in the build directory
+ */
+
+/**
  * Returns all files in a directory (recursively)
  * @param {string} directoryPath - path to the directory containing the files
- * @returns {Promise<{path: string, name: string}[]>} file path and name
+ * @returns {Promise<File[]>} files
  */
 const getFiles = async (directoryPath) => {
   const entries = await readdir(directoryPath, { withFileTypes: true });
@@ -46,16 +59,16 @@ const formatBytes = (bytes, decimals = 2, binary = true) => {
 
 /**
  * Filters files by filetype
- * @param {{path: string, name: string}[]} files - files from the `getFiles` function
+ * @param {File[]} files - files to filter
  * @param {string} type - file type, e.g. "js", "css", "tsx", etc.
- * @returns {{path: string, name: string}[]} files filtered by filetype
+ * @returns {File[]} files filtered by filetype
  */
 const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
 
 /**
  * Gets file sizes
- * @param {{path: string, name: string}[]} files - files from the `getFiles` function
+ * @param {File[]} files - files to get size
  * @returns {Promise<number[]>} sizes of the files
  */
 const getFileSizes = async (files) =>
@@ -65,10 +78,7 @@ const getFileSizes = async (files) =>
  * Provides sizes for an application's production build
  * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", "java", etc.
- * @returns {Promise<{ mainBundleSize: number, buildSize: number, buildFileCount: number}>}
- * - mainBundleSize - size in bytes of the largest bundle file by type
- * - buildSize - size in bytes of all files in the build directory
- * - buildFileCount - count of all files in the build directory
+ * @returns {Promise<BuildSizes>} build sizes
  */
 const getBuildSizes = async (buildPath, bundleFileType = "js") => {
   const build = resolve(process.cwd(), buildPath);
