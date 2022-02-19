@@ -1,7 +1,8 @@
 {
   "name": "build-sizes",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A small script that provides build sizes to assist with optimization",
+  "homepage": "https://benelan.github.io/build-sizes",
   "keywords": [
     "metrics",
     "size",
@@ -11,7 +12,7 @@
   ],
   "author": {
     "name": "Ben Elan",
-    "url": "https://benelan.dev/"
+    "url": "https://benelan.dev"
   },
   "main": "./index.js",
   "exports": "./index.js",
