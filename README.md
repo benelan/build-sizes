@@ -25,7 +25,7 @@ npm i -D build-sizes
 
 ## Usage
 
-To run the script, you need to provide the path from the current working directory to the application's build directory. For example, `create-react-app` generates a directory named `build` for production. Once the application is built, you can get the sizes by running the following from the application's root directory:
+To run the script, you need to provide the path to the application's build directory. For example, `create-react-app` generates a directory named `build` for production. Once the application is built, you can get the sizes by running the following from the application's root directory:
 
 ```bash
 build-sizes build
@@ -106,10 +106,10 @@ Descriptions, parameters, and return values for the exported functions.
 
 Gets sizes for an application's production build.
 
-| Parameter              | Description                                                                  | Type     |
-| ---------------------- | ---------------------------------------------------------------------------- | -------- |
-| buildPath `(required)` | path from the current working directory to the application's build directory | `string` |
-| bundleFileType         | type of the bundle files (default is `js`)                                   | `string` |
+| Parameter              | Description                                | Type     |
+| ---------------------- | ------------------------------------------ | -------- |
+| buildPath `(required)` | path to the application's build directory  | `string` |
+| bundleFileType         | type of the bundle files (default is `js`) | `string` |
 
 The function returns a `Promise` which resolves an object with three properties.
 
@@ -139,9 +139,9 @@ The function returns a human readable size with units (`string`).
 
 Gets all files in a directory (recursively).
 
-| Parameter                  | Description                                                                   | Type     |
-| -------------------------- | ----------------------------------------------------------------------------- | -------- |
-| directoryPath `(required)` | path from the current working directory to the directory containing the files | `string` |
+| Parameter                  | Description                                | Type     |
+| -------------------------- | ------------------------------------------ | -------- |
+| directoryPath `(required)` | path to the directory containing the files | `string` |
 
 The function returns a `Promise` which resolves an array of objects with two properties.
 

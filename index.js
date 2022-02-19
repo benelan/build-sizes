@@ -6,7 +6,7 @@ const {
 
 /**
  * Returns all files in a directory (recursively)
- * @param {string} directoryPath - path from the current working directory to the directory containing the files
+ * @param {string} directoryPath - path to the directory containing the files
  * @returns {Promise<{path: string, name: string}[]>} file path and name
  */
 const getFiles = async (directoryPath) => {
@@ -63,7 +63,7 @@ const getFileSizes = async (files) =>
 
 /**
  * Provides sizes for an application's production build
- * @param {string} buildPath - path from the current working directory to the build directory
+ * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", "java", etc.
  * @returns {Promise<{ mainBundleSize: number, buildSize:number, buildFileCount: number}>}
  * - mainBundleSize - size in bytes of the largest bundle file by type
