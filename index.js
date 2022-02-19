@@ -65,7 +65,7 @@ const getFileSizes = async (files) =>
  * Provides sizes for an application's production build
  * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", "java", etc.
- * @returns {Promise<{ mainBundleSize: number, buildSize:number, buildFileCount: number}>}
+ * @returns {Promise<{ mainBundleSize: number, buildSize: number, buildFileCount: number}>}
  * - mainBundleSize - size in bytes of the largest bundle file by type
  * - buildSize - size in bytes of all files in the build directory
  * - buildFileCount - count of all files in the build directory

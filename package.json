@@ -1,7 +1,7 @@
 {
   "name": "build-sizes",
-  "version": "2.2.0",
-  "description": "A small script that provides sizes of production builds to assist with optimization",
+  "version": "2.3.0",
+  "description": "A small script that provides build sizes to assist with optimization",
   "keywords": [
     "metrics",
     "size",

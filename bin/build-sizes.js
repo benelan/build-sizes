@@ -16,7 +16,7 @@ const logHeader = (message) => {
 
     if (!buildPath) {
       throw new Error(
-        "Error: Invalid or missing arguments. The path to the production build directory is a required."
+        "Error: Invalid or missing arguments. The path to the build directory is required."
       );
     }
 

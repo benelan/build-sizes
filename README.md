@@ -106,10 +106,10 @@ Descriptions, parameters, and return values for the exported functions.
 
 Gets sizes for an application's production build.
 
-| Parameter              | Description                                | Type     |
-| ---------------------- | ------------------------------------------ | -------- |
-| buildPath `(required)` | path to the application's build directory  | `string` |
-| bundleFileType         | type of the bundle files (default is `js`) | `string` |
+| Parameter                   | Description                                | Type     |
+| --------------------------- | ------------------------------------------ | -------- |
+| buildPath                   | path to the application's build directory  | `string` |
+| bundleFileType `(optional)` | type of the bundle files (default is `js`) | `string` |
 
 The function returns a `Promise` which resolves an object with three properties.
 
@@ -125,11 +125,11 @@ The function returns a `Promise` which resolves an object with three properties.
 
 Formats bytes to a human readable size.
 
-| Parameter          | Description                                      | Type      |
-| ------------------ | ------------------------------------------------ | --------- |
-| bytes `(required)` | bytes to format into human readable size         | `number`  |
-| decimals           | decimal precision for rounding (default is `2`)  | `number`  |
-| binary             | binary or decimal conversion (default is `true`) | `boolean` |
+| Parameter             | Description                                      | Type      |
+| --------------------- | ------------------------------------------------ | --------- |
+| bytes                 | bytes to format into human readable size         | `number`  |
+| decimals `(optional)` | decimal precision for rounding (default is `2`)  | `number`  |
+| binary `(optional)`   | binary or decimal conversion (default is `true`) | `boolean` |
 
 The function returns a human readable size with units (`string`).
 
@@ -139,9 +139,9 @@ The function returns a human readable size with units (`string`).
 
 Gets all files in a directory (recursively).
 
-| Parameter                  | Description                                | Type     |
-| -------------------------- | ------------------------------------------ | -------- |
-| directoryPath `(required)` | path to the directory containing the files | `string` |
+| Parameter     | Description                                | Type     |
+| ------------- | ------------------------------------------ | -------- |
+| directoryPath | path to the directory containing the files | `string` |
 
 The function returns a `Promise` which resolves an array of objects with two properties.
 
@@ -156,10 +156,10 @@ The function returns a `Promise` which resolves an array of objects with two pro
 
 Filters files by filetype.
 
-| Parameter          | Description                                     | Type                             |
-| ------------------ | ----------------------------------------------- | -------------------------------- |
-| files `(required)` | files from the [`getFiles`](#getfiles) function | `{path: string, name: string}[]` |
-| type `(required)`  | file type, e.g. `"js"`, `"css"`, `"tsx"`, etc.  | `string`                         |
+| Parameter         | Description                                     | Type                             |
+| ----------------- | ----------------------------------------------- | -------------------------------- |
+| files             | files from the [`getFiles`](#getfiles) function | `{path: string, name: string}[]` |
+| type `(optional)` | file type, e.g. `js`, `css`, `tsx`, etc.        | `string`                         |
 
 The function returns the `files` filtered by type.
 
@@ -169,9 +169,9 @@ The function returns the `files` filtered by type.
 
 Gets file sizes.
 
-| Parameter          | Description                                     | Type                             |
-| ------------------ | ----------------------------------------------- | -------------------------------- |
-| files `(required)` | files from the [`getFiles`](#getfiles) function | `{path: string, name: string}[]` |
+| Parameter | Description                                     | Type                             |
+| --------- | ----------------------------------------------- | -------------------------------- |
+| files     | files from the [`getFiles`](#getfiles) function | `{path: string, name: string}[]` |
 
 The function returns a `Promise` which resolves an array of file sizes (`number[]`).
 
