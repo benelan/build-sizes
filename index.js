@@ -28,15 +28,15 @@ const getFiles = async (directoryPath) => {
 
 /**
  * Formats bytes to a human readable size
- * @param {number} bytes - bytes to format into human readable size
+ * @param {number} bytes - bytes to format
  * @param {number} [decimals=2] - decimal precision for rounding
  * @param {boolean} [binary=true] - binary or decimal conversion
  * @returns {string} human readable file size with units
  */
 const formatBytes = (bytes, decimals = 2, binary = true) => {
-  if (bytes === 0) return "0 Bytes";
+  if (!bytes) return "0 B";
 
-  const unitSizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const unitSizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   const k = binary ? 1024 : 1000; // binary vs decimal conversion
   const d = !decimals || decimals < 0 ? 0 : decimals; // no negative decimal precision
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -48,7 +48,7 @@ const formatBytes = (bytes, decimals = 2, binary = true) => {
  * Filters files by filetype
  * @param {{path: string, name: string}[]} files - files from the `getFiles` function
  * @param {string} type - file type, e.g. "js", "css", "tsx", etc.
- * @returns {{path: string, name: string}[]} - files filtered by filetype
+ * @returns {{path: string, name: string}[]} files filtered by filetype
  */
 const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
@@ -64,24 +64,30 @@ const getFileSizes = async (files) =>
 /**
  * Provides sizes for an application's production build
  * @param {string} buildPath - path from the current working directory to the build directory
+ * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", "java", etc.
  * @returns {Promise<{ mainBundleSize: number, buildSize:number, buildFileCount: number}>}
- * - mainBundleSize - size in bytes of the largest JavaScript bundle file
+ * - mainBundleSize - size in bytes of the largest bundle file by type
  * - buildSize - size in bytes of all files in the build directory
  * - buildFileCount - count of all files in the build directory
  */
-const getBuildSizes = async (buildPath) => {
+const getBuildSizes = async (buildPath, bundleFileType = "js") => {
   const build = resolve(process.cwd(), buildPath);
   const buildFiles = await getFiles(build);
+  const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
+  const allFileSizes = await getFileSizes(buildFiles);
+  const filteredFileSizes = await getFileSizes(filteredBuildFiles);
 
-  // largest javascript file
-  const mainBundleSize = Math.max(
-    ...(await getFileSizes(filterFilesByType(buildFiles, "js")))
-  );
-  // sum of file sizes
-  const buildSize = (await getFileSizes(buildFiles)).reduce(
+  // largest file size by type
+  const mainBundleSize = filteredFileSizes.length
+    ? Math.max(...filteredFileSizes)
+    : 0;
+
+  // sum of all file sizes
+  const buildSize = allFileSizes.reduce(
     (count, fileSize) => count + fileSize,
     0
   );
+
   const buildFileCount = buildFiles.length;
 
   return { mainBundleSize, buildSize, buildFileCount };

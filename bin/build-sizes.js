@@ -12,7 +12,7 @@ const logHeader = (message) => {
 
 (async () => {
   try {
-    const [buildPath] = process.argv.splice(2);
+    const [buildPath, bundleFileType] = process.argv.splice(2);
 
     if (!buildPath) {
       throw new Error(
@@ -20,19 +20,22 @@ const logHeader = (message) => {
       );
     }
 
+    const bundleType = bundleFileType || "js"
+
     const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
-      buildPath
+      buildPath,
+      bundleType
     );
 
     const headerText = "Application Build Sizes";
     logHeader(headerText);
 
     console.log(
-      "Main bundle size: ",
+      `Main ${bundleType} bundle size:`,
       formatBytes(mainBundleSize),
-      "\nOn-disk size: ",
+      "\nOn-disk build size:",
       formatBytes(buildSize),
-      "\nOn-disk files: ",
+      "\nOn-disk build files:",
       buildFileCount
     );
 
