@@ -4,23 +4,27 @@ A small script that provides build sizes to assist with optimization.
 
 <br>
 <div align="center">
-    <b>🚀 Available as an
-    <a href="https://www.npmjs.com/package/build-sizes" target="_blank" rel="noreferrer noopener">NPM package</a>!
-    🚀</b>
+    <b>🚀 Zero dependencies! 🚀</b>
 </div>
 
 ## Installation
 
-Install the package globally and use it anywhere:
+Install [the package](https://www.npmjs.com/package/build-sizes) globally and use it anywhere:
 
 ```bash
 npm i -g build-sizes
 ```
 
-Or use it in a single application:
+Use it in a single application:
 
 ```bash
 npm i -D build-sizes
+```
+
+Or try it out before installing:
+
+```bash
+npx build-sizes your/build/directory
 ```
 
 ## Usage
