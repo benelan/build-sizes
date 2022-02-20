@@ -29,7 +29,7 @@ const getFiles = async (directoryPath) => {
 };
 
 /**
- * Formats bytes to a human readable size
+ * Formats bytes to a human readable size.
  * @since v2.1.0
  * @param {number} bytes - bytes to format
  * @param {number} [decimals=2] - decimal precision for rounding
@@ -48,7 +48,7 @@ const formatBytes = (bytes, decimals = 2, binary = true) => {
 };
 
 /**
- * Filters files by file type. Use {@link getFiles} to retrieve your build files
+ * Filters files by file type. Use {@link getFiles} to retrieve your build files.
  * @since v2.2.0
  * @param {File[]} files - files to filter
  * @param {string} type - file type, e.g. "js", "tsx", etc.
@@ -67,7 +67,7 @@ const getFileSizes = async (files) =>
   await Promise.all(files.map(async (file) => (await stat(file.path)).size));
 
 /**
- * Provides sizes for an application's production build
+ * Provides sizes for an application's production build.
  * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", etc.
  * @returns {Promise<BuildSizes>} build sizes
@@ -96,16 +96,22 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 };
 
 /**
+ * File information used for determining type and size.
  * @typedef {Object} File
  * @property {string} name - file name
  * @property {string} path - file path
+ * @see {@link getFiles}
+ * @see {@link getFileSizes}
+ * @see {@link filterFilesByType}
  */
 
 /**
+ * The primary output of the script.
  * @typedef {Object} BuildSizes
  * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
  * @property {number} buildSize - size in bytes of all files in the build directory
  * @property {number} buildFileCount - count of all files in the build directory
+ * @see {@link getBuildSizes}
  */
 
 module.exports = {
