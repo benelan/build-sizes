@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 const { getBuildSizes, formatBytes } = require("../index.js");
 
-/**
- * Emphasizes a message in the console
- * @param {string} message - text to log
- */
-const logHeader = (message) => {
-  const line = "-".repeat(message.length + 8);
-  console.log(`${line}\n|-> ${message} <-|\n${line}`);
-};
-
 (async () => {
   try {
     const [buildPath, bundleFileType] = process.argv.splice(2);
@@ -20,26 +11,24 @@ const logHeader = (message) => {
       );
     }
 
-    const bundleType = bundleFileType || "js"
-
     const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
       buildPath,
-      bundleType
+      bundleFileType || "js"
     );
 
-    const headerText = "Application Build Sizes";
-    logHeader(headerText);
-
+    const title = "|-> Application Build Sizes <-|";
+    const line = "-".repeat(title.length);
+    
     console.log(
-      `Main ${bundleType} bundle size:`,
+      `\n${line}\n${title}\n${line}`,
+      `\nMain ${bundleFileType || "js"} bundle size:`,
       formatBytes(mainBundleSize),
       "\nOn-disk build size:",
       formatBytes(buildSize),
       "\nOn-disk build files:",
-      buildFileCount
+      buildFileCount,
+      `\n${line}\n`
     );
-
-    console.log("-".repeat(headerText.length + 8));
   } catch (err) {
     console.error(err);
     process.exitCode = 1;
