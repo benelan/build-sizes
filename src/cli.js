@@ -11,18 +11,18 @@ import { getBuildSizes, formatBytes } from "./index.js";
       );
     }
 
-    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
-      buildPath,
-      bundleFileType || "js"
-    );
+    const { mainBundleName, mainBundleSize, buildSize, buildFileCount } =
+      await getBuildSizes(buildPath, bundleFileType || "js");
 
     const title = "|-> Application Build Sizes <-|";
     const line = "-".repeat(title.length);
-    
+
     console.log(
       `\n${line}\n${title}\n${line}`,
       `\nMain ${bundleFileType || "js"} bundle size:`,
       formatBytes(mainBundleSize),
+      `\nMain bundle name:`,
+      mainBundleName,
       "\nOn-disk build size:",
       formatBytes(buildSize),
       "\nOn-disk build files:",

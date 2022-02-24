@@ -2,7 +2,8 @@
 import { resolve } from "path";
 import fs from "fs";
 const {
-  promises: { readdir, stat }, } = fs;
+  promises: { readdir, stat },
+} = fs;
 
 /**
  * Returns all files in a directory (recursive).
@@ -12,9 +13,14 @@ const {
  */
 const getFiles = async (directoryPath) => {
   const entries = await readdir(directoryPath, { withFileTypes: true });
+
   const files = entries
     .filter((file) => !file.isDirectory())
-    .map((file) => ({ ...file, path: resolve(directoryPath, file.name) }));
+    .map(async ({ name }) => {
+      const path = resolve(directoryPath, name);
+      const { size } = await stat(path);
+      return { name, path, size };
+    });
 
   const directories = entries.filter((folder) => folder.isDirectory());
 
@@ -25,7 +31,8 @@ const getFiles = async (directoryPath) => {
     );
     files.push(...subdirectoryFiles);
   }
-  return files;
+
+  return Promise.all(files);
 };
 
 /**
@@ -60,8 +67,9 @@ const filterFilesByType = (files, type) =>
 /**
  * Gets file sizes in bytes. Use {@link getFiles} to retrieve your build files.
  * @since v2.2.0
+ * @deprecated {@link File} now has a size property
  * @param {File[]} files - files to measure
- * @returns {Promise<number[]>} sizes of the files in bytes
+ * @returns {Promise<File[]>} sizes of the files in bytes
  */
 const getFileSizes = async (files) =>
   await Promise.all(files.map(async (file) => (await stat(file.path)).size));
@@ -76,30 +84,29 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
   const build = resolve(process.cwd(), buildPath);
   const buildFiles = await getFiles(build);
   const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
-  const allFileSizes = await getFileSizes(buildFiles);
-  const filteredFileSizes = await getFileSizes(filteredBuildFiles);
 
-  // largest file size by type
-  const mainBundleSize = filteredFileSizes.length
-    ? Math.max(...filteredFileSizes)
-    : 0;
+  // the file with the largest size by type
+  const mainBundleFile = filteredBuildFiles.length
+    ? filteredBuildFiles.reduce((max, file) => max.size > file.size ? max : file)
+    : null;
 
+  // the largest file size by type
+  const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
+  const mainBundleName = mainBundleFile.name;
   // sum of all file sizes
-  const buildSize = allFileSizes.reduce(
-    (count, fileSize) => count + fileSize,
-    0
-  );
+  const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
 
   const buildFileCount = buildFiles.length;
 
-  return { mainBundleSize, buildSize, buildFileCount };
+  return { mainBundleName, mainBundleSize, buildSize, buildFileCount };
 };
 
 /**
- * File information used for determining type and size.
+ * Important information about a file.
  * @typedef {Object} File
- * @property {string} name - file name
- * @property {string} path - file path
+ * @property {string} name - file name with type
+ * @property {string} path - absolute file path
+ * @property {string} size - uncompressed file size
  * @see {@link getFiles}
  * @see {@link getFileSizes}
  * @see {@link filterFilesByType}
@@ -108,6 +115,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 /**
  * The primary output of the script.
  * @typedef {Object} BuildSizes
+ * @property {string} mainBundleName - bane if the largest bundle size by type
  * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
  * @property {number} buildSize - size in bytes of all files in the build directory
  * @property {number} buildFileCount - count of all files in the build directory

@@ -74,10 +74,10 @@ The sizes will be logged to the console after running `npm run build`.
 
 ### Using the functions
 
-The package also exports a few functions. Here is [the documentation](https://benelan.github.io/build-sizes/global.html), and here is a usage example:
+The package also exports a few functions, which are available as both CommonJS and ECMAScript modules. Here is [the documentation](https://benelan.github.io/build-sizes/global.html), and here is a usage example:
 
 ```js
-const { getBuildSizes, formatBytes } = require("build-sizes");
+import { getBuildSizes, formatBytes } from "build-sizes";
 
 (async () => {
   try {
