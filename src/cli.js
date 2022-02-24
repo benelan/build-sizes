@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { getBuildSizes, formatBytes } = require("../index.js");
+import { getBuildSizes, formatBytes } from "./index.js";
 
 (async () => {
   try {

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-const { resolve } = require("path");
+import { resolve } from "path";
+import fs from "fs";
 const {
-  promises: { readdir, stat },
-} = require("fs");
+  promises: { readdir, stat }, } = fs;
 
 /**
  * Returns all files in a directory (recursive).
@@ -114,7 +114,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @see {@link getBuildSizes}
  */
 
-module.exports = {
+export {
   getBuildSizes,
   formatBytes,
   getFiles,
