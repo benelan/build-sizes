@@ -2,9 +2,11 @@
 import { resolve } from "path";
 import { readdir, stat, readFile } from "fs/promises";
 import { promisify } from "util";
+import { exec } from "child_process";
 import { gzip, brotliCompress } from "zlib";
 const compressGzip = promisify(gzip);
 const compressBrotli = promisify(brotliCompress);
+const execBash = promisify(exec);
 
 /**
  * Returns all files in a directory (recursive).
@@ -79,7 +81,7 @@ const getFileSizes = async (files) =>
  * Compresses a file using gzip and returns the size (no write)
  * @since v2.5.0
  * @param {string} filePath - path of the file to compress
- * @returns {Promise<number>} file size, compressed using gzip, with the default [zlib]{@link https://nodejs.org/api/zlib.html} options
+ * @returns {Promise<number>} file size compressed using gzip with the default [zlib]{@link https://nodejs.org/api/zlib.html#class-options} options
  */
 const getFileSizeGzip = (filePath) =>
   readFile(filePath)
@@ -91,7 +93,7 @@ const getFileSizeGzip = (filePath) =>
  * Compresses a file using brotli and returns the size (no write)
  * @since v2.5.0
  * @param {string} filePath - path of the file to compress
- * @returns {Promise<number>} file size, compressed using brotli, with the default [zlib]{@link https://nodejs.org/api/zlib.html} options
+ * @returns {Promise<number>} file size compressed using brotli with the default [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
 const getFileSizeBrotli = (filePath) =>
   readFile(filePath)
@@ -106,37 +108,50 @@ const getFileSizeBrotli = (filePath) =>
  * @returns {Promise<BuildSizes>} build sizes
  */
 const getBuildSizes = async (buildPath, bundleFileType = "js") => {
-  const build = resolve(process.cwd(), buildPath);
-  const buildFiles = await getFiles(build);
-  const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
+  try {
+    const build = resolve(process.cwd(), buildPath);
+    const buildFiles = await getFiles(build);
+    const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
 
-  // the file with the largest size by type
-  const mainBundleFile = filteredBuildFiles.length
-    ? filteredBuildFiles.reduce((max, file) =>
-        max.size > file.size ? max : file
-      )
-    : null;
-  const mainBundleName = mainBundleFile.name;
-  // the largest file size by type
-  const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
+    // the file with the largest size by type
+    const mainBundleFile = filteredBuildFiles.length
+      ? filteredBuildFiles.reduce((max, file) =>
+          max.size > file.size ? max : file
+        )
+      : null;
+    const mainBundleName = mainBundleFile.name;
+    // the largest file size by type
+    const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
 
-  // main bundle size compressed using gzip and brotli
-  const mainBundleSizeGzip = await getFileSizeGzip(mainBundleFile.path);
-  const mainBundleSizeBrotli = await getFileSizeBrotli(mainBundleFile.path);
+    // main bundle size compressed using gzip and brotli
+    const mainBundleSizeGzip = await getFileSizeGzip(mainBundleFile.path);
+    const mainBundleSizeBrotli = await getFileSizeBrotli(mainBundleFile.path);
 
-  // sum of all file sizes
-  const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
+    // sum of all file sizes
+    const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
 
-  const buildFileCount = buildFiles.length;
+    // the du command is not available on windows
+    const buildSizeOnDisk =
+      process.platform !== "win32"
+        ? Number((await execBash(`du -sb ${build} | cut -f1`)).stdout.trim())
+        : NaN;
 
-  return {
-    mainBundleName,
-    mainBundleSize,
-    mainBundleSizeGzip,
-    mainBundleSizeBrotli,
-    buildSize,
-    buildFileCount,
-  };
+    console.log(buildSizeOnDisk);
+    const buildFileCount = buildFiles.length;
+
+    return {
+      mainBundleName,
+      mainBundleSize,
+      mainBundleSizeGzip,
+      mainBundleSizeBrotli,
+      buildSize,
+      buildSizeOnDisk,
+      buildFileCount,
+    };
+  } catch (e) {
+    console.error(e);
+    process.exitCode = 1;
+  }
 };
 
 /**
@@ -146,7 +161,8 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @property {string} path - absolute file path
  * @property {string} size - uncompressed file size
  * @see {@link getFiles}
- * @see {@link getFileSizes}
+ * @see {@link getFileSizeBrotli}
+ * @see {@link getFileSizeGzip}
  * @see {@link filterFilesByType}
  */
 
@@ -158,6 +174,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @property {number} mainBundleSizeGzip - size in bytes of the main bundle file compressed with gzip
  * @property {number} mainBundleSizeBrotli - size in bytes of the main bundle file  compressed with brotli
  * @property {number} buildSize - size in bytes of all files in the build directory
+ * @property {number} buildSizeOnDisk -  on-disk size in bytes of the build directory. Not available on Windows.
  * @property {number} buildFileCount - count of all files in the build directory
  * @see {@link getBuildSizes}
  */
@@ -167,5 +184,7 @@ export {
   formatBytes,
   getFiles,
   getFileSizes,
+  getFileSizeGzip,
+  getFileSizeBrotli,
   filterFilesByType,
 };

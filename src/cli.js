@@ -18,6 +18,7 @@ import { getBuildSizes, formatBytes } from "./index.js";
       mainBundleSizeGzip,
       mainBundleSizeBrotli,
       buildSize,
+      buildSizeOnDisk,
       buildFileCount,
     } = await getBuildSizes(buildPath, type);
 
@@ -27,10 +28,13 @@ import { getBuildSizes, formatBytes } from "./index.js";
     console.log(
       `\n${line}\n${title}\n${line}`,
       `\n Build`,
-      "\n --> total size:",
-      formatBytes(buildSize),
       "\n --> file count:",
       buildFileCount,
+      "\n --> size:",
+      formatBytes(buildSize),
+      buildSizeOnDisk
+        ? ("\n --> on-disk size:", formatBytes(buildSizeOnDisk))
+        : "",
       `\n${line}`,
       `\n Main ${type.toUpperCase()} bundle`,
       `\n --> name:`,
