@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { resolve } from "path";
-import fs from "fs";
-const {
-  promises: { readdir, stat },
-} = fs;
+import { readdir, stat, readFile } from "fs/promises";
+import { promisify } from "util";
+import { gzip, brotliCompress } from "zlib";
+const compressGzip = promisify(gzip);
+const compressBrotli = promisify(brotliCompress);
 
 /**
  * Returns all files in a directory (recursive).
@@ -75,6 +76,30 @@ const getFileSizes = async (files) =>
   await Promise.all(files.map(async (file) => (await stat(file.path)).size));
 
 /**
+ * Compresses a file using gzip and returns the size (no write)
+ * @since v2.5.0
+ * @param {string} filePath - path of the file to compress
+ * @returns {Promise<number>} file size, compressed using gzip, with the default [zlib]{@link https://nodejs.org/api/zlib.html} options
+ */
+const getFileSizeGzip = (filePath) =>
+  readFile(filePath)
+    .then(compressGzip)
+    .then((output) => output.length)
+    .catch((e) => console.error(e));
+
+/**
+ * Compresses a file using brotli and returns the size (no write)
+ * @since v2.5.0
+ * @param {string} filePath - path of the file to compress
+ * @returns {Promise<number>} file size, compressed using brotli, with the default [zlib]{@link https://nodejs.org/api/zlib.html} options
+ */
+const getFileSizeBrotli = (filePath) =>
+  readFile(filePath)
+    .then(compressBrotli)
+    .then((output) => output.length)
+    .catch((e) => console.error(e));
+
+/**
  * Provides sizes for an application's production build.
  * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", etc.
@@ -87,18 +112,31 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 
   // the file with the largest size by type
   const mainBundleFile = filteredBuildFiles.length
-    ? filteredBuildFiles.reduce((max, file) => max.size > file.size ? max : file)
+    ? filteredBuildFiles.reduce((max, file) =>
+        max.size > file.size ? max : file
+      )
     : null;
-
+  const mainBundleName = mainBundleFile.name;
   // the largest file size by type
   const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
-  const mainBundleName = mainBundleFile.name;
+
+  // main bundle size compressed using gzip and brotli
+  const mainBundleSizeGzip = await getFileSizeGzip(mainBundleFile.path);
+  const mainBundleSizeBrotli = await getFileSizeBrotli(mainBundleFile.path);
+
   // sum of all file sizes
   const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
 
   const buildFileCount = buildFiles.length;
 
-  return { mainBundleName, mainBundleSize, buildSize, buildFileCount };
+  return {
+    mainBundleName,
+    mainBundleSize,
+    mainBundleSizeGzip,
+    mainBundleSizeBrotli,
+    buildSize,
+    buildFileCount,
+  };
 };
 
 /**
@@ -117,6 +155,8 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @typedef {Object} BuildSizes
  * @property {string} mainBundleName - bane if the largest bundle size by type
  * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
+ * @property {number} mainBundleSizeGzip - size in bytes of the main bundle file compressed with gzip
+ * @property {number} mainBundleSizeBrotli - size in bytes of the main bundle file  compressed with brotli
  * @property {number} buildSize - size in bytes of all files in the build directory
  * @property {number} buildFileCount - count of all files in the build directory
  * @see {@link getBuildSizes}

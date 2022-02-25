@@ -10,23 +10,37 @@ import { getBuildSizes, formatBytes } from "./index.js";
         "Error: Invalid or missing arguments. The path to the build directory is required."
       );
     }
+    const type = bundleFileType || "js";
 
-    const { mainBundleName, mainBundleSize, buildSize, buildFileCount } =
-      await getBuildSizes(buildPath, bundleFileType || "js");
+    const {
+      mainBundleName,
+      mainBundleSize,
+      mainBundleSizeGzip,
+      mainBundleSizeBrotli,
+      buildSize,
+      buildFileCount,
+    } = await getBuildSizes(buildPath, type);
 
-    const title = "|-> Application Build Sizes <-|";
-    const line = "-".repeat(title.length);
+    const title = "|> Application Build Sizes <|";
+    const line = "~".repeat(title.length);
 
     console.log(
       `\n${line}\n${title}\n${line}`,
-      `\nMain ${bundleFileType || "js"} bundle size:`,
-      formatBytes(mainBundleSize),
-      `\nMain bundle name:`,
-      mainBundleName,
-      "\nOn-disk build size:",
+      `\n Build`,
+      "\n --> total size:",
       formatBytes(buildSize),
-      "\nOn-disk build files:",
+      "\n --> file count:",
       buildFileCount,
+      `\n${line}`,
+      `\n Main ${type.toUpperCase()} bundle`,
+      `\n --> name:`,
+      mainBundleName,
+      `\n --> size:`,
+      formatBytes(mainBundleSize),
+      `\n --> gzip size:`,
+      formatBytes(mainBundleSizeGzip),
+      `\n --> brotli size:`,
+      formatBytes(mainBundleSizeBrotli),
       `\n${line}\n`
     );
   } catch (err) {

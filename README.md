@@ -38,13 +38,19 @@ build-sizes build
 And the output to the console is:
 
 ```
--------------------------------
-|-> Application Build Sizes <-|
--------------------------------
-Main js bundle size: 268.61 KB
-On-disk build size: 3.03 MB
-On-disk build files: 4761
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|> Application Build Sizes <|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ Build 
+ --> total size: 2.06 MB 
+ --> file count: 2389 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+ Main JS bundle 
+ --> name: main.916a6715.js 
+ --> size: 268.61 KB 
+ --> gzip size: 71.45 KB 
+ --> brotli size: 61.01 KB 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ```
 
 You can also specify a filetype for the main (largest) bundle size. The default is `js`.
@@ -81,16 +87,18 @@ import { getBuildSizes, formatBytes } from "build-sizes";
 
 (async () => {
   try {
-    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
-      "your-app/build-path"
-    );
+      const {
+        mainBundleSize,
+        buildSize,
+        buildFileCount,
+      } = await getBuildSizes("your-app/build-path");
 
     console.log(
       "Main bundle size:",
       formatBytes(mainBundleSize),
-      "\nOn-disk build size:",
+      "\nBuild size:",
       formatBytes(buildSize),
-      "\nOn-disk build files:",
+      "\nBuild file count:",
       buildFileCount
     );
   } catch (err) {
