@@ -9,6 +9,26 @@ const compressBrotli = promisify(brotliCompress);
 const execBash = promisify(exec);
 
 /**
+ * Formats bytes to a human readable size.
+ * @since v2.1.0
+ * @param {number} bytes - bytes to format
+ * @param {number} [decimals=2] - decimal precision for rounding
+ * @param {boolean} [binary=true] - binary or decimal conversion
+ * @returns {string} human readable file size with units
+ */
+const formatBytes = (bytes, decimals = 2, binary = true) => {
+  if (!bytes) return "0 B";
+  const k = binary ? 1024 : 1000;
+  const n = binary ? [~~(Math.log10(bytes) / 3)] : ~~(Math.log2(bytes) / 10);
+  return (
+    (bytes / Math.pow(k, n)).toFixed(decimals) +
+    " " +
+    ("KMGTPEZY"[n - 1] || "") +
+    "B"
+  );
+};
+
+/**
  * Returns all files in a directory (recursive).
  * @since v2.1.0
  * @param {string} directoryPath - path to the directory containing the files
@@ -26,7 +46,6 @@ const getFiles = async (directoryPath) => {
     });
 
   const directories = entries.filter((folder) => folder.isDirectory());
-
   for (const directory of directories) {
     // recursive calls for subdirectories
     const subdirectoryFiles = await getFiles(
@@ -36,25 +55,6 @@ const getFiles = async (directoryPath) => {
   }
 
   return Promise.all(files);
-};
-
-/**
- * Formats bytes to a human readable size.
- * @since v2.1.0
- * @param {number} bytes - bytes to format
- * @param {number} [decimals=2] - decimal precision for rounding
- * @param {boolean} [binary=true] - binary or decimal conversion
- * @returns {string} human readable file size with units
- */
-const formatBytes = (bytes, decimals = 2, binary = true) => {
-  if (!bytes) return "0 B";
-
-  const unitSizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  const k = binary ? 1024 : 1000; // binary vs decimal conversion
-  const d = !decimals || decimals < 0 ? 0 : decimals; // no negative decimal precision
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(d))} ${unitSizes[i]}`;
 };
 
 /**
@@ -136,7 +136,6 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
         ? Number((await execBash(`du -sb ${build} | cut -f1`)).stdout.trim())
         : NaN;
 
-    console.log(buildSizeOnDisk);
     const buildFileCount = buildFiles.length;
 
     return {

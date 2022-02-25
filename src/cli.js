@@ -32,19 +32,19 @@ import { getBuildSizes, formatBytes } from "./index.js";
       buildFileCount,
       "\n --> size:",
       formatBytes(buildSize),
-      buildSizeOnDisk
-        ? ("\n --> on-disk size:", formatBytes(buildSizeOnDisk))
-        : "",
+      buildSizeOnDisk // uses the unix du command
+        ? `\n --> on-disk size: ${formatBytes(buildSizeOnDisk, 2, false)}`
+        : "", // not supported on Windows
       `\n${line}`,
       `\n Main ${type.toUpperCase()} bundle`,
       `\n --> name:`,
       mainBundleName,
       `\n --> size:`,
-      formatBytes(mainBundleSize),
+      formatBytes(mainBundleSize, 2, false),
       `\n --> gzip size:`,
-      formatBytes(mainBundleSizeGzip),
+      formatBytes(mainBundleSizeGzip, 2, false),
       `\n --> brotli size:`,
-      formatBytes(mainBundleSizeBrotli),
+      formatBytes(mainBundleSizeBrotli, 2, false),
       `\n${line}\n`
     );
   } catch (err) {
