@@ -23,10 +23,10 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
       .replace(",", " at");
 
     // convert build-sizes output into csv header and row
-    const header = ["Timestamp", "Version", ...Object.keys(sizes)]
+    const header = ["Version", "Timestamp", ...Object.keys(sizes)]
       .join(",")
       .concat("\n");
-    const row = [timestamp, version, ...Object.values(sizes)]
+    const row = [version, timestamp, ...Object.values(sizes)]
       .join(",")
       .concat("\n");
 
@@ -34,10 +34,10 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
     await writeFile(outputPath, header, { flag: "wx" });
     // append build size info to csv
     await appendFile(outputPath, row);
-  } catch (e) {
+  } catch (err) {
     // don't catch error from writeFile if output file exists
-    if (e.code !== "EEXIST") {
-      console.error(e);
+    if (err.code !== "EEXIST") {
+      console.error(err);
       process.exitCode = 1;
     }
   }
