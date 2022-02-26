@@ -13,10 +13,10 @@ const execBash = promisify(exec);
  * @since v2.1.0
  * @param {number} bytes - bytes to format
  * @param {number} [decimals=2] - decimal precision for rounding
- * @param {boolean} [binary=true] - binary or decimal conversion
+ * @param {boolean} [binary=false] - binary or decimal unit conversion
  * @returns {string} human readable file size with units
  */
-const formatBytes = (bytes, decimals = 2, binary = true) => {
+const formatBytes = (bytes, decimals = 2, binary = false) => {
   if (!bytes) return "0 B";
   const k = binary ? 1024 : 1000;
   const n = binary ? [~~(Math.log10(bytes) / 3)] : ~~(Math.log2(bytes) / 10);

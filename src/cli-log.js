@@ -92,12 +92,15 @@ const FLAG_INFO = {
       buildFileCount,
     } = await getBuildSizes(path, decimals);
 
+    // logging
     const title = "|> Application Build Sizes <|";
     const line = "~".repeat(title.length);
+    const underline = (text) => `\x1b[4m${text}\x1b[0m`;
+    const bundle = `Main ${type.toUpperCase()} bundle`;
 
     console.log(
       `\n${line}\n${title}\n${line}`,
-      `\n Build`,
+      `\n${underline("Build")}`,
       "\n --> file count:",
       buildFileCount,
       "\n --> size:",
@@ -110,7 +113,7 @@ const FLAG_INFO = {
           )}`
         : "", // not supported on Windows
       `\n${line}`,
-      `\n Main ${type.toUpperCase()} bundle`,
+      `\n${underline(bundle)}`,
       `\n --> name:`,
       mainBundleName,
       `\n --> size:`,
