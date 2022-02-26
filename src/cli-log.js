@@ -1,15 +1,11 @@
 #!/usr/bin/env node
 import { getBuildSizes, formatBytes } from "./index.js";
 
+const ARGUMENT_ERROR = "The path to the build directory is required.";
 (async () => {
   try {
     const [buildPath, bundleFileType] = process.argv.splice(2);
-
-    if (!buildPath) {
-      throw new Error(
-        "Error: Invalid or missing arguments. The path to the build directory is required."
-      );
-    }
+    if (!buildPath) throw new Error(ARGUMENT_ERROR);
     const type = bundleFileType || "js";
 
     const {
