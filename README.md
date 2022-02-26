@@ -40,17 +40,18 @@ And the output to the console is:
 ```
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 |> Application Build Sizes <|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Build 
+ --> file count: 419 
+ --> size: 27.73 MB 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Main JS bundle 
+ --> name: main.6e924e92.js 
+ --> size: 1.70 MB 
+ --> gzip size: 462.92 KB 
+ --> brotli size: 375.26 KB 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Build
- --> total size: 2.06 MB
- --> file count: 2389
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Main JS bundle
- --> name: main.916a6715.js
- --> size: 268.61 KB
- --> gzip size: 71.45 KB
- --> brotli size: 61.01 KB
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ```
 
 You can also specify a filetype for the main (largest) bundle size. The default is `js`.
