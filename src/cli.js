@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { getBuildSizes, formatBytes } from "./index.js";
+import { getBuildSizes, saveBuildSizes, formatBytes } from "./index.js";
+import { resolve } from "path";
 
 const HELP_MESSAGE = "TODO: help message";
 
@@ -7,7 +8,7 @@ const FLAG_INFO = {
   path: {
     description: "path to the build directory",
     required: true,
-    value: null,
+    value: undefined,
   },
   binary: {
     description: "convert bytes to human readable format in base 2",
@@ -25,19 +26,21 @@ const FLAG_INFO = {
     required: false,
     value: "js",
   },
+  outfile: {
+    description:
+      "path to a file where the build sizes will be saved as CSV data",
+    required: false,
+    value: undefined,
+  },
 };
 
 (async () => {
   try {
     const args = process.argv.splice(2);
 
-    if (
-      !args ||
-      !args.length ||
-      args.includes("-h") ||
-      args.includes("--help")
-    ) {
-      throw new Error(HELP_MESSAGE);
+    if (!args.length || args.includes("-h") || args.includes("--help")) {
+      console.error(HELP_MESSAGE);
+      process.exit();
     }
 
     const flagKeys = Object.keys(FLAG_INFO);
@@ -45,42 +48,48 @@ const FLAG_INFO = {
     const flagAliasRegex = (f) => new RegExp("-" + f.charAt(0));
 
     args.forEach((a, i) => {
-      console.log(a);
       flagKeys.forEach((flag) => {
-        console.log(FLAG_INFO[flag]);
         if (flagNameRegex(flag).test(a) || flagAliasRegex(flag).test(a)) {
           console.log("flag provided: ", flag);
           if (a.includes("=")) {
-            const value = a[i].substring(a[i].indexOf("=") + 1);
+            const value = a.substring(a.indexOf("=") + 1);
             FLAG_INFO[flag].value = value;
           } else if (FLAG_INFO[flag]?.boolean === true) {
             console.log("boolean flag: ", flag);
-            FLAG_INFO[flag].value = true;
-          } else if (args.length > i + 1 && args[i + 1].charAt(0) !== "-") {
+            FLAG_INFO[flag].value = !FLAG_INFO[flag].value;
+          } else if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
             console.log("flag with space: ", flag);
             FLAG_INFO[flag].value = args[i + 1];
           } else {
-            throw new Error("unable to parse flag: ", flag);
+            throw new Error(`unable to parse value for: "${flag}" flag`);
           }
-        } else {
-          if (FLAG_INFO[flag].required) {
-            throw new Error("required flag missing: ", flag);
-          }
+        } else if (
+          !a.startsWith("-") &&
+          !FLAG_INFO.path.value &&
+          (i === 0 || !args[i - 1].startsWith("-") || args[i - 1].includes("="))
+        ) {
+          console.log(args[i - 1]);
+          FLAG_INFO.path.value = a;
         }
       });
     });
 
-    if (FLAG_INFO.path?.value === undefined) {
-      throw new Error(
-        "invalid or missing arguments. The path to the build directory is required."
-      );
+    if (FLAG_INFO.path.value === undefined) {
+      throw new Error("The path to the build directory is required.");
     }
 
-    // check second arg for file type
+    // get values for flags, some of which are likely defaults
     const type = FLAG_INFO["filetype"].value;
     const decimals = FLAG_INFO["decimals"].value;
-    const path = FLAG_INFO["path"].value;
+    const path = resolve(FLAG_INFO["path"].value);
     const binary = FLAG_INFO["binary"].value;
+    const outfile = FLAG_INFO["outfile"]?.value;
+
+    const buildSizes = await getBuildSizes(path, type);
+
+    if (outfile) {
+      saveBuildSizes(buildSizes, outfile);
+    }
 
     const {
       mainBundleName,
@@ -90,7 +99,7 @@ const FLAG_INFO = {
       buildSize,
       buildSizeOnDisk,
       buildFileCount,
-    } = await getBuildSizes(path, decimals);
+    } = buildSizes;
 
     // logging
     const title = "|> Application Build Sizes <|";

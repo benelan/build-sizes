@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { resolve } from "path";
-import { readdir, stat, readFile } from "fs/promises";
+import { readdir, stat, readFile, appendFile, writeFile } from "fs/promises";
 import { promisify } from "util";
 import { exec } from "child_process";
 import { gzip, brotliCompress } from "zlib";
@@ -112,20 +112,24 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
     const build = resolve(process.cwd(), buildPath);
     const buildFiles = await getFiles(build);
     const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
-
     // the file with the largest size by type
     const mainBundleFile = filteredBuildFiles.length
       ? filteredBuildFiles.reduce((max, file) =>
           max.size > file.size ? max : file
         )
       : null;
-    const mainBundleName = mainBundleFile.name;
+
+    const mainBundleName = mainBundleFile ? mainBundleFile.name : "Not found";
     // the largest file size by type
     const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
 
     // main bundle size compressed using gzip and brotli
-    const mainBundleSizeGzip = await getFileSizeGzip(mainBundleFile.path);
-    const mainBundleSizeBrotli = await getFileSizeBrotli(mainBundleFile.path);
+    const mainBundleSizeGzip = mainBundleFile
+      ? await getFileSizeGzip(mainBundleFile.path)
+      : 0;
+    const mainBundleSizeBrotli = mainBundleFile
+      ? await getFileSizeBrotli(mainBundleFile.path)
+      : 0;
 
     // sum of all file sizes
     const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
@@ -154,6 +158,54 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 };
 
 /**
+ * Saves the build sizes {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
+ * @since 2.5
+ * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
+ * @param {string} outputPath - the path to the output file, e.g. data/build-sizes.csv
+ */
+const saveBuildSizes = async (buildSizes, outputPath) => {
+  try {
+    const version = JSON.parse(await readFile("package.json", "utf8")).version;
+    const timestamp = new Intl.DateTimeFormat("default", {
+      dateStyle: "short",
+      timeStyle: "long",
+    })
+      .format(Date.now())
+      .replace(",", " at");
+
+    // convert build-sizes output into csv header and row
+    const header = [
+      "Version",
+      "Timestamp",
+      ...Object.keys(buildSizes),
+      "(File sizes in bytes)",
+    ]
+      .join(",")
+      .concat("\n");
+
+    const row = [version, timestamp, ...Object.values(buildSizes)]
+      .join(",")
+      .concat("\n");
+
+    // write header if output file doesn't exist (errors if it does)
+    await writeFile(outputPath, header, { flag: "wx" });
+    // append build size info to csv
+    await appendFile(outputPath, row);
+  } catch (err) {
+    if (err.code === "ENOENT" && err.path === "package.json") {
+      console.error(
+        "Error saving build sizes: To access package.json for the project version number, I must be called from the root directory (or whichever directory the package.json file lives in). I recommended adding me as an NPM script so I can be called anywhere in the project."
+      );
+    }
+    // don't catch error from writeFile if output file exists
+    if (err.code !== "EEXIST") {
+      console.error(err);
+      process.exitCode = 1;
+    }
+  }
+};
+
+/**
  * Important information about a file.
  * @typedef {Object} File
  * @property {string} name - file name with type
@@ -166,9 +218,9 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  */
 
 /**
- * The primary output of the script.
+ * Information about a project's build sizes, primarily used for optimization.
  * @typedef {Object} BuildSizes
- * @property {string} mainBundleName - bane if the largest bundle size by type
+ * @property {string} mainBundleName - name of the largest bundle size by type
  * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
  * @property {number} mainBundleSizeGzip - size in bytes of the main bundle file compressed with gzip
  * @property {number} mainBundleSizeBrotli - size in bytes of the main bundle file  compressed with brotli
@@ -176,10 +228,12 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @property {number} buildSizeOnDisk -  on-disk size in bytes of the build directory. Not available on Windows.
  * @property {number} buildFileCount - count of all files in the build directory
  * @see {@link getBuildSizes}
+ * @see {@link saveBuildSizes}
  */
 
 export {
   getBuildSizes,
+  saveBuildSizes,
   formatBytes,
   getFiles,
   getFileSizes,
