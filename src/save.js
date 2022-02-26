@@ -2,36 +2,37 @@
 import { appendFile, readFile, writeFile } from "fs/promises";
 import { getBuildSizes } from "./index.js";
 
+const ARGUMENT_ERROR = `Two required arguments (in order):
+- path to the build directory
+- path of the output csv file`;
+
 (async () => {
   try {
+    // check cli arguments
     const [buildPath, outputPath] = process.argv.splice(2);
-    if (!buildPath) throw new Error("Provide the path to the build directory");
-    if (!outputPath) throw new Error("Provide the path of the output csv file");
+    if (!buildPath || !outputPath) throw new Error(ARGUMENT_ERROR);
 
+    // get projects's build sizes and version number
     const sizes = await getBuildSizes(buildPath);
-    // get projects's version number
     const version = JSON.parse(await readFile("package.json", "utf8")).version;
 
+    // convert build size object into csv header and row
     const header = ["Timestamp", "Version", ...Object.keys(sizes)]
       .join(",")
       .concat("\n");
-
     const row = [Date.now(), version, ...Object.values(sizes)]
       .join(",")
       .concat("\n");
 
-    try {
-      // write csv header if file doesn't exist
-      await writeFile(outputPath, header, { flag: "wx" });
-    } catch (e) {
-      if (e.code !== "EEXIST") {
-        // don't throw error if file does exists
-        throw new Error(e);
-      }
-    }
+      // write header if output file doesn't exist (errors if it does)
+    await writeFile(outputPath, header, { flag: "wx" });
+    // append build size info to csv
     await appendFile(outputPath, row);
   } catch (e) {
-    console.error(e);
-    process.exitCode = 1;
+    // don't throw error if output file existed before write
+    if (e.code !== "EEXIST") {
+      console.error(e);
+      process.exitCode = 1;
+    }
   }
 })();
