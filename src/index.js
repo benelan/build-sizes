@@ -68,16 +68,6 @@ const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
 
 /**
- * Gets file sizes in bytes. Use {@link getFiles} to retrieve your build files.
- * @since v2.2.0
- * @deprecated {@link File} now has a size property
- * @param {File[]} files - files to measure
- * @returns {Promise<File[]>} sizes of the files in bytes
- */
-const getFileSizes = async (files) =>
-  await Promise.all(files.map(async (file) => (await stat(file.path)).size));
-
-/**
  * Compresses a file using gzip and returns the size (no write)
  * @since v2.5.0
  * @param {string} filePath - path of the file to compress
@@ -194,7 +184,7 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
   } catch (err) {
     if (err.code === "ENOENT" && err.path === "package.json") {
       console.error(
-        "Error saving build sizes: To access package.json for the project version number, I must be called from the root directory (or whichever directory the package.json file lives in). I recommended adding me as an NPM script so I can be called anywhere in the project."
+        "Error saving build sizes to CSV: To access package.json for the project version number, I must be called from the root directory (or whichever directory the package.json file lives in). I recommended adding me as an NPM script so I can be called anywhere in the project."
       );
     }
     // don't catch error from writeFile if output file exists
@@ -236,7 +226,6 @@ export {
   saveBuildSizes,
   formatBytes,
   getFiles,
-  getFileSizes,
   getFileSizeGzip,
   getFileSizeBrotli,
   filterFilesByType,
