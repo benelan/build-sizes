@@ -201,7 +201,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 };
 
 /**
- * Saves the build sizes {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
+ * Saves the build sizes from {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
  * @since v3.0.0
  * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
  * @param {string} outputPath - the path to the output file, e.g. data/build-sizes.csv

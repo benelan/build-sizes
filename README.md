@@ -177,8 +177,7 @@ You could even add it as a `postpublish` script to keep track of your build size
 
 ```diff
  "scripts": {
-    "prepublish": "npm ci && npm test && npm run build",
-    "publish": "... && npm publish,
+    "publish": "... && npm publish",
 +   "postpublish": "build-sizes dist --outfile=.metrics.csv",
     ...
 ```

@@ -231,7 +231,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line57">line 57</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -438,12 +438,12 @@
             
                 <td class="default">
                 
-                    true
+                    false
                 
                 </td>
             
 
-            <td class="description last">binary or decimal conversion</td>
+            <td class="description last">binary or decimal unit conversion</td>
         </tr>
 
     
@@ -487,7 +487,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line39">line 39</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line19">line 19</a>
     </li></ul></dd>
     
 
@@ -701,7 +701,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line75">line 75</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line145">line 145</a>
     </li></ul></dd>
     
 
@@ -863,7 +863,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line13">line 13</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line52">line 52</a>
     </li></ul></dd>
     
 
@@ -921,7 +921,7 @@
     
 
     
-    <h4 class="name" id="getFileSizes"><span class="type-signature">(async) </span>getFileSizes<span class="signature">(files)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;number>>}</span></h4>
+    <h4 class="name" id="getFileSizeBrotli"><span class="type-signature"></span>getFileSizeBrotli<span class="signature">(filePath)</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
     
 
     
@@ -929,7 +929,7 @@
 
 
 <div class="description">
-    Gets file sizes in bytes. Use <a href="global.html#getFiles">getFiles</a> to retrieve your build files.
+    Compresses a file using brotli and returns the size (no write)
 </div>
 
 
@@ -965,13 +965,13 @@
 
         <tr>
             
-                <td class="name"><code>files</code></td>
+                <td class="name"><code>filePath</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="global.html#File">File</a>></span>
+<span class="param-type">string</span>
 
 
             
@@ -981,7 +981,7 @@
 
             
 
-            <td class="description last">files to measure</td>
+            <td class="description last">path of the file to compress</td>
         </tr>
 
     
@@ -999,7 +999,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>v2.2.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>v3.0.0</li></ul></dd>
     
 
     
@@ -1025,7 +1025,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line66">line 66</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -1054,7 +1054,7 @@
 
         
 <div class="param-desc">
-    sizes of the files in bytes
+    file size compressed using brotli with the default <a href="https://nodejs.org/api/zlib.html#brotli-constants">zlib</a> options
 </div>
 
 
@@ -1065,13 +1065,338 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Array.&lt;number>></span>
+<span class="param-type">Promise.&lt;number></span>
 
 
     </dd>
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getFileSizeGzip"><span class="type-signature"></span>getFileSizeGzip<span class="signature">(filePath)</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Compresses a file using gzip and returns the size (no write)
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filePath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">path of the file to compress</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>v3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line107">line 107</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    file size compressed using gzip with the default <a href="https://nodejs.org/api/zlib.html#class-options">zlib</a> options
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="saveBuildSizes"><span class="type-signature">(async) </span>saveBuildSizes<span class="signature">(buildSizes, outputPath)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Saves the build sizes from <a href="global.html#getBuildSizes">getBuildSizes</a> to a CSV file. Useful for tracking sizes over time.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>buildSizes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#BuildSizes">BuildSizes</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">build sizes that will be saved to CSV</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>outputPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the path to the output file, e.g. data/build-sizes.csv</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>v3.0.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line209">line 209</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1091,7 +1416,7 @@
 
 
 <div class="description">
-    The primary output of the script.
+    Information about a project's build sizes, primarily used for optimization.
 </div>
 
 
@@ -1136,6 +1461,29 @@
 
         <tr>
             
+                <td class="name"><code>mainBundleName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">name of the largest bundle size by type</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>mainBundleSize</code></td>
             
 
@@ -1159,6 +1507,52 @@
 
         <tr>
             
+                <td class="name"><code>mainBundleSizeGzip</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">size in bytes of the main bundle file compressed with gzip</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mainBundleSizeBrotli</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">size in bytes of the main bundle file  compressed with brotli</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>buildSize</code></td>
             
 
@@ -1176,6 +1570,29 @@
             
 
             <td class="description last">size in bytes of all files in the build directory</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>buildSizeOnDisk</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">on-disk size in bytes of the build directory. Not available on Windows.</td>
         </tr>
 
     
@@ -1237,7 +1654,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line108">line 108</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line286">line 286</a>
     </li></ul></dd>
     
 
@@ -1248,6 +1665,8 @@
     <dd class="tag-see">
         <ul>
             <li><a href="global.html#getBuildSizes">getBuildSizes</a></li>
+        
+            <li><a href="global.html#saveBuildSizes">saveBuildSizes</a></li>
         </ul>
     </dd>
     
@@ -1268,7 +1687,7 @@
 
 
 <div class="description">
-    File information used for determining type and size.
+    Important information about a file.
 </div>
 
 
@@ -1329,7 +1748,7 @@
 
             
 
-            <td class="description last">file name</td>
+            <td class="description last">file name with type</td>
         </tr>
 
     
@@ -1352,7 +1771,30 @@
 
             
 
-            <td class="description last">file path</td>
+            <td class="description last">absolute file path</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">uncompressed file size</td>
         </tr>
 
     
@@ -1391,7 +1833,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line98">line 98</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line274">line 274</a>
     </li></ul></dd>
     
 
@@ -1403,7 +1845,9 @@
         <ul>
             <li><a href="global.html#getFiles">getFiles</a></li>
         
-            <li><a href="global.html#getFileSizes">getFileSizes</a></li>
+            <li><a href="global.html#getFileSizeBrotli">getFileSizeBrotli</a></li>
+        
+            <li><a href="global.html#getFileSizeGzip">getFileSizeGzip</a></li>
         
             <li><a href="global.html#filterFilesByType">filterFilesByType</a></li>
         </ul>
@@ -1432,13 +1876,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#filterFilesByType">filterFilesByType</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#getBuildSizes">getBuildSizes</a></li><li><a href="global.html#getFiles">getFiles</a></li><li><a href="global.html#getFileSizes">getFileSizes</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#filterFilesByType">filterFilesByType</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#getBuildSizes">getBuildSizes</a></li><li><a href="global.html#getFiles">getFiles</a></li><li><a href="global.html#getFileSizeBrotli">getFileSizeBrotli</a></li><li><a href="global.html#getFileSizeGzip">getFileSizeGzip</a></li><li><a href="global.html#saveBuildSizes">saveBuildSizes</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Sat Feb 19 2022 16:53:47 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Sun Feb 27 2022 14:19:17 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

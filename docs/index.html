@@ -59,25 +59,77 @@
 <p>Or try it out before installing:</p>
 <pre class="prettyprint source lang-bash"><code>npx build-sizes your/build/directory
 </code></pre>
-<h2>Usage</h2>
-<p>To run the script, you need to provide the path to the application's build directory. For example, <code>create-react-app</code> generates a directory named <code>build</code> for production. Once the application is built, you can get the sizes by running the following from the application's root directory:</p>
+<h2>Using the CLI</h2>
+<p>To run the script, you need to provide the path (absolute or relative) to the application's build directory. For example, <code>create-react-app</code> generates a directory named <code>build</code> for production (other common names include <code>dist</code> and <code>public</code>). Once the application is built, you can get the sizes by running the following from the application's root directory:</p>
 <pre class="prettyprint source lang-bash"><code>build-sizes build
 </code></pre>
 <p>And the output to the console is:</p>
-<pre class="prettyprint source"><code>-------------------------------
-|-> Application Build Sizes &lt;-|
--------------------------------
-Main js bundle size: 268.61 KB
-On-disk build size: 3.03 MB
-On-disk build files: 4761
--------------------------------
+<pre class="prettyprint source"><code>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|> Application Build Sizes &lt;|
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Build 
+ --> file count: 419 
+ --> size: 27.73 MB 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+Main JS bundle 
+ --> name: main.6e924e92.js 
+ --> size: 1.70 MB 
+ --> gzip size: 462.92 KB 
+ --> brotli size: 375.26 KB 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 </code></pre>
-<p>You can also specify a filetype for the main (largest) bundle size. The default is <code>js</code>.</p>
-<pre class="prettyprint source lang-bash"><code>build-sizes build css
+<p>There are also options that you can provide with flags. For example, you can specify a filetype for the largest bundle size (default is &quot;js&quot;):</p>
+<pre class="prettyprint source lang-bash"><code>build-sizes build --filetype=css
 </code></pre>
-<p>Other common directory names used by frameworks for production builds are <code>dist</code> and <code>public</code>.</p>
-<h3>Running from an NPM script</h3>
-<p>You can get the sizes after every build by adding a <code>postbuild</code> NPM script:</p>
+<p>Providing the <code>-h</code> or <code>--help</code> flag will log usage information to the console, copy/pasted here for convenience:</p>
+<details>
+<h3>Arguments</h3>
+<p><strong>path [required]</strong></p>
+<ul>
+<li>Path to the build directory</li>
+</ul>
+<h3>Options</h3>
+<p><strong>-b, --binary  [boolean]</strong></p>
+<ul>
+<li>Convert bytes to human readable format in base 2 instead of base 10</li>
+</ul>
+<p><strong>-d, --decimals</strong></p>
+<ul>
+<li>Number of decimal places for rounding bytes to a human readable format (default is 2)</li>
+</ul>
+<p><strong>-f, --filetype</strong></p>
+<ul>
+<li>Filetype of the main bundle (default is js)</li>
+</ul>
+<p><strong>-o, --outfile</strong></p>
+<ul>
+<li>Path to a file for saving build sizes as CSV data</li>
+</ul>
+<p><strong>-p, --path [required]</strong></p>
+<ul>
+<li>Path to the build directory (also available as argument)</li>
+</ul>
+<h3>Examples</h3>
+<p><code>build-sizes dist</code></p>
+<ul>
+<li>Simplest usage with sane defaults</li>
+</ul>
+<p><code>build-sizes dist --filetype=css --binary --decimals=1</code></p>
+<ul>
+<li>Size of the largest css file with tweaked number formatting</li>
+</ul>
+<p><code>build-sizes -f=css -b -d=1 -p=dist</code></p>
+<ul>
+<li>Same as above, but use a flag for path when it's not the first argument</li>
+</ul>
+<p><code>build-sizes dist --outfile=data/build-sizes.csv</code></p>
+<ul>
+<li>Save the build sizes to a csv</li>
+</ul>
+</details>
+<h3>Running from an npm script</h3>
+<p>Pro tip: you can get the sizes after every build by adding a <code>postbuild</code> npm script:</p>
 <pre class="prettyprint source lang-diff"><code> &quot;scripts&quot;: {
     &quot;start&quot;: &quot;react-scripts start&quot;,
     &quot;build&quot;: &quot;react-scripts build&quot;,
@@ -88,30 +140,62 @@ On-disk build files: 4761
 ...
 </code></pre>
 <p>The sizes will be logged to the console after running <code>npm run build</code>.</p>
-<h3>Using the functions</h3>
-<p>The package also exports a few functions. Here is <a href="https://benelan.github.io/build-sizes/global.html">the documentation</a>, and here is a usage example:</p>
-<pre class="prettyprint source lang-js"><code>const { getBuildSizes, formatBytes } = require(&quot;build-sizes&quot;);
+<h2>Using the functions</h2>
+<p>The package also exports functions, <a href="https://benelan.github.io/build-sizes/global.html">documented here</a>. They are available as both CommonJS and ECMAScript modules. Check out the <a href="https://github.com/benelan/build-sizes/blob/master/src/cli.js">CLI code</a> for a simple usage example that logs build sizes to the console. Here is another usage example that saves your project's build sizes, version, and a timestamp to a CSV file.</p>
+<pre class="prettyprint source lang-js"><code>import { appendFile, readFile, writeFile } from &quot;fs/promises&quot;;
+import { getBuildSizes } from &quot;build-sizes&quot;;
+
+const ARGUMENT_ERROR = `Two required arguments (in order):
+    - path to the build directory
+    - path of the output csv file`;
 
 (async () => {
   try {
-    const { mainBundleSize, buildSize, buildFileCount } = await getBuildSizes(
-      &quot;your-app/build-path&quot;
-    );
+    const [build, outfile] = process.argv.splice(2);
+    if (!build || !outfile) throw new Error(ARGUMENT_ERROR);
 
-    console.log(
-      &quot;Main bundle size:&quot;,
-      formatBytes(mainBundleSize),
-      &quot;\nOn-disk build size:&quot;,
-      formatBytes(buildSize),
-      &quot;\nOn-disk build files:&quot;,
-      buildFileCount
-    );
+    const sizes = await getBuildSizes(build);
+    const version = JSON.parse(await readFile(&quot;package.json&quot;, &quot;utf8&quot;)).version;
+
+    // convert build-sizes output into csv header and row
+    const header = [&quot;Version&quot;, &quot;Timestamp&quot;, ...Object.keys(sizes)]
+      .join(&quot;,&quot;)
+      .concat(&quot;\n&quot;);
+
+    const row = [version, Date.now(), ...Object.values(sizes)]
+      .join(&quot;,&quot;)
+      .concat(&quot;\n&quot;);
+
+    try {
+      // write csv header if outfile doesn't exist
+      await writeFile(outfile, header, { flag: &quot;wx&quot; });
+    } catch (err) {
+      // don't throw error if outfile does exists
+      if (err.code !== &quot;EEXIST&quot;) {
+        throw new Error(err);
+      }
+    }
+    // append build size info to csv
+    await appendFile(outfile, row);
   } catch (err) {
     console.error(err);
-    process.exitCode = 1;
+    process.exit(1);
   }
 })();
-</code></pre></article>
+</code></pre>
+<p>You can use the example by providing the paths to the build directory and output CSV file:</p>
+<pre class="prettyprint source lang-bash"><code>node save.js dist sizes.csv
+</code></pre>
+<p>You could even add it as a <code>postpublish</code> script to keep track of your build sizes for each release! As a matter of fact, scratch that I'm adding it to the package 🚀</p>
+<pre class="prettyprint source lang-diff"><code> &quot;scripts&quot;: {
+    &quot;publish&quot;: &quot;... && npm publish&quot;,
++   &quot;postpublish&quot;: &quot;build-sizes dist --outfile=.metrics.csv&quot;,
+    ...
+</code></pre>
+<p>The <code>saveBuildSizes</code> function is also exported! So you can use it in your scripts like the snippet above did with <code>getBuildSizes</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> The save script assumes it runs from the projects root directory when getting the version from <code>package.json</code>. Adding it as an npm script is recommended so you can call it in any of the project's directories.</p>
+</blockquote></article>
     </section>
 
 
@@ -122,13 +206,13 @@ On-disk build files: 4761
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#filterFilesByType">filterFilesByType</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#getBuildSizes">getBuildSizes</a></li><li><a href="global.html#getFiles">getFiles</a></li><li><a href="global.html#getFileSizes">getFileSizes</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#filterFilesByType">filterFilesByType</a></li><li><a href="global.html#formatBytes">formatBytes</a></li><li><a href="global.html#getBuildSizes">getBuildSizes</a></li><li><a href="global.html#getFiles">getFiles</a></li><li><a href="global.html#getFileSizeBrotli">getFileSizeBrotli</a></li><li><a href="global.html#getFileSizeGzip">getFileSizeGzip</a></li><li><a href="global.html#saveBuildSizes">saveBuildSizes</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Sat Feb 19 2022 16:53:47 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Sun Feb 27 2022 14:19:17 GMT-0800 (Pacific Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
