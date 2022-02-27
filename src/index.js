@@ -17,15 +17,30 @@ const execBash = promisify(exec);
  * @returns {string} human readable file size with units
  */
 const formatBytes = (bytes, decimals = 2, binary = false) => {
-  if (!bytes) return "0 B";
-  const k = binary ? 1024 : 1000;
-  const n = binary ? [~~(Math.log10(bytes) / 3)] : ~~(Math.log2(bytes) / 10);
-  return (
-    (bytes / Math.pow(k, n)).toFixed(decimals) +
-    " " +
-    ("KMGTPEZY"[n - 1] || "") +
-    "B"
-  );
+  // I prefer human readable sizes. 
+  // Don't like it? byte me! 
+  try {
+    if (!bytes) return "0 B";
+    const k = binary ? 1024 : 1000;
+    const n = binary ? [~~(Math.log10(bytes) / 3)] : ~~(Math.log2(bytes) / 10);
+    return (
+      (bytes / Math.pow(k, n)).toFixed(decimals) +
+      " " +
+      ("KMGTPEZY"[n - 1] || "") +
+      "B"
+    );
+  } catch (err) {
+    help(
+      err,
+      "\n\nOccurred while formatting bytes. Double check the inputs:",
+      "\n    bytes:",
+      bytes,
+      "\n    decimals:",
+      decimals,
+      "\n    binary:",
+      binary
+    );
+  }
 };
 
 /**
@@ -35,26 +50,39 @@ const formatBytes = (bytes, decimals = 2, binary = false) => {
  * @returns {Promise<File[]>} all files in the directory and subdirectories
  */
 const getFiles = async (directoryPath) => {
-  const entries = await readdir(directoryPath, { withFileTypes: true });
+  try {
+    const entries = await readdir(directoryPath, { withFileTypes: true });
 
-  const files = entries
-    .filter((file) => !file.isDirectory())
-    .map(async ({ name }) => {
-      const path = resolve(directoryPath, name);
-      const { size } = await stat(path);
-      return { name, path, size };
-    });
+    const files = entries
+      .filter((file) => !file.isDirectory())
+      .map(async ({ name }) => {
+        const path = resolve(directoryPath, name);
+        const { size } = await stat(path);
+        return { name, path, size };
+      });
 
-  const directories = entries.filter((folder) => folder.isDirectory());
-  for (const directory of directories) {
-    // recursive calls for subdirectories
-    const subdirectoryFiles = await getFiles(
-      resolve(directoryPath, directory.name)
-    );
-    files.push(...subdirectoryFiles);
+    const directories = entries.filter((folder) => folder.isDirectory());
+    for (const directory of directories) {
+      // recursive calls for subdirectories
+      const subdirectoryFiles = await getFiles(
+        resolve(directoryPath, directory.name)
+      );
+      files.push(...subdirectoryFiles);
+    }
+
+    return Promise.all(files);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      help("Error: Could not find build at specified path:\n   ", directoryPath);
+    } else {
+      help(
+        err,
+        "\n\nOccurred while finding build files.",
+        "Double check the file path:\n   ",
+        directoryPath
+      );
+    }
   }
-
-  return Promise.all(files);
 };
 
 /**
@@ -69,7 +97,7 @@ const filterFilesByType = (files, type) =>
 
 /**
  * Compresses a file using gzip and returns the size (no write)
- * @since v2.5.0
+ * @since v3.0.0
  * @param {string} filePath - path of the file to compress
  * @returns {Promise<number>} file size compressed using gzip with the default [zlib]{@link https://nodejs.org/api/zlib.html#class-options} options
  */
@@ -77,11 +105,18 @@ const getFileSizeGzip = (filePath) =>
   readFile(filePath)
     .then(compressGzip)
     .then((output) => output.length)
-    .catch((e) => console.error(e));
+    .catch((err) =>
+      help(
+        err,
+        "\n\nOccurred while getting gzipped file size.",
+        "Double check the file path:\n   ",
+        filePath
+      )
+    );
 
 /**
  * Compresses a file using brotli and returns the size (no write)
- * @since v2.5.0
+ * @since v3.0.0
  * @param {string} filePath - path of the file to compress
  * @returns {Promise<number>} file size compressed using brotli with the default [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
@@ -89,7 +124,14 @@ const getFileSizeBrotli = (filePath) =>
   readFile(filePath)
     .then(compressBrotli)
     .then((output) => output.length)
-    .catch((e) => console.error(e));
+    .catch((err) =>
+      help(
+        err,
+        "\n\nOccurred while getting brotli compressed file size.",
+        "Double check the file path:\n   ",
+        filePath
+      )
+    );
 
 /**
  * Provides sizes for an application's production build.
@@ -102,16 +144,17 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
     const build = resolve(process.cwd(), buildPath);
     const buildFiles = await getFiles(build);
     const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
+    
     // the file with the largest size by type
     const mainBundleFile = filteredBuildFiles.length
       ? filteredBuildFiles.reduce((max, file) =>
           max.size > file.size ? max : file
         )
       : null;
-
-    const mainBundleName = mainBundleFile ? mainBundleFile.name : "Not found";
+    
     // the largest file size by type
     const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
+    const mainBundleName = mainBundleFile ? mainBundleFile.name : "Not found";
 
     // main bundle size compressed using gzip and brotli
     const mainBundleSizeGzip = mainBundleFile
@@ -141,21 +184,30 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
       buildSizeOnDisk,
       buildFileCount,
     };
-  } catch (e) {
-    console.error(e);
-    process.exitCode = 1;
+  } catch (err) {
+    help(
+      err,
+      "\n\nOccurred while getting build sizes.",
+      "Double check the inputs:",
+      "\n    build path:",
+      resolve(buildPath),
+      "\n    bundle filetype:",
+      bundleFileType
+    );
   }
 };
 
 /**
  * Saves the build sizes {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
- * @since 2.5
+ * @since v3.0.0
  * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
  * @param {string} outputPath - the path to the output file, e.g. data/build-sizes.csv
  */
 const saveBuildSizes = async (buildSizes, outputPath) => {
   try {
+    const outfile = resolve(outputPath);
     const version = JSON.parse(await readFile("package.json", "utf8")).version;
+    
     const timestamp = new Intl.DateTimeFormat("default", {
       dateStyle: "short",
       timeStyle: "long",
@@ -176,24 +228,40 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
     const row = [version, timestamp, ...Object.values(buildSizes)]
       .join(",")
       .concat("\n");
-
+    throw new Error("byte me")
     // write header if output file doesn't exist (errors if it does)
-    await writeFile(outputPath, header, { flag: "wx" });
+    await writeFile(outfile, header, { flag: "wx" });
     // append build size info to csv
-    await appendFile(outputPath, row);
+    await appendFile(outfile, row);
   } catch (err) {
     if (err.code === "ENOENT" && err.path === "package.json") {
-      console.error(
-        "Error saving build sizes to CSV: To access package.json for the project version number, I must be called from the root directory (or whichever directory the package.json file lives in). I recommended adding me as an NPM script so I can be called anywhere in the project."
+      help(
+        "Error saving build sizes to CSV. I must be called from the same directory as package.json to log the project version number. I recommended adding me as an NPM script so I can be called anywhere in the project."
       );
     }
     // don't catch error from writeFile if output file exists
     if (err.code !== "EEXIST") {
-      console.error(err);
-      process.exitCode = 1;
+      help(
+        err,
+        "\n\nOccurred while saving build sizes.",
+        "Double check the output path:\n   ",
+        resolve(outputPath)
+      );
     }
   }
 };
+
+/**
+ * Prints help message to stderr, as well as any included parameters. Exits with code 1
+ * @private
+ * @since v3.0.0
+ * @param  {...any} messages - info for stderr
+ */
+function help(...messages) {
+  messages && console.error(...messages);
+  console.error("\nAdd the -h or --help flag for usage information.");
+  process.exit(1);
+}
 
 /**
  * Important information about a file.
@@ -229,4 +297,5 @@ export {
   getFileSizeGzip,
   getFileSizeBrotli,
   filterFilesByType,
+  help
 };
