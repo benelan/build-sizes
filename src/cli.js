@@ -2,33 +2,33 @@
 import { getBuildSizes, saveBuildSizes, formatBytes } from "./index.js";
 import { resolve } from "path";
 
-const HELP_MESSAGE = "TODO: help message";
-
 const FLAG_INFO = {
   path: {
-    description: "path to the build directory",
+    description: "Path to the build directory",
     required: true,
     value: undefined,
   },
   binary: {
-    description: "convert bytes to human readable format in base 2",
+    description:
+      "Convert bytes to human readable format in base 2 (default is base 10)",
     required: false,
     value: false,
     boolean: true,
   },
   decimals: {
-    description: "decimal places for rounding",
+    description:
+      "Decimal places for rounding bytes to a human readable format (default is 2)",
     required: false,
     value: 2,
   },
   filetype: {
-    description: "filetype of the main bundle",
+    description: "Filetype of the main bundle (default is js)",
     required: false,
     value: "js",
   },
   outfile: {
     description:
-      "path to a file where the build sizes will be saved as CSV data",
+      "Path to a file where the build sizes will be saved as CSV data.",
     required: false,
     value: undefined,
   },
@@ -39,7 +39,7 @@ const FLAG_INFO = {
     const args = process.argv.splice(2);
 
     if (!args.length || args.includes("-h") || args.includes("--help")) {
-      console.error(HELP_MESSAGE);
+      console.error(help());
       process.exit();
     }
 
@@ -50,26 +50,20 @@ const FLAG_INFO = {
     args.forEach((a, i) => {
       flagKeys.forEach((flag) => {
         if (flagNameRegex(flag).test(a) || flagAliasRegex(flag).test(a)) {
-          console.log("flag provided: ", flag);
           if (a.includes("=")) {
             const value = a.substring(a.indexOf("=") + 1);
             FLAG_INFO[flag].value = value;
           } else if (FLAG_INFO[flag]?.boolean === true) {
-            console.log("boolean flag: ", flag);
             FLAG_INFO[flag].value = !FLAG_INFO[flag].value;
           } else if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
-            console.log("flag with space: ", flag);
             FLAG_INFO[flag].value = args[i + 1];
           } else {
             throw new Error(`unable to parse value for: "${flag}" flag`);
           }
-        } else if (
-          !a.startsWith("-") &&
-          !FLAG_INFO.path.value &&
-          (i === 0 || !args[i - 1].startsWith("-") || args[i - 1].includes("="))
-        ) {
-          console.log(args[i - 1]);
+          console.log(`${flag}: ${FLAG_INFO[flag].value}`);
+        } else if (i === 0 && !a.startsWith("-") && !FLAG_INFO.path.value) {
           FLAG_INFO.path.value = a;
+          console.log("path: ", a);
         }
       });
     });
@@ -135,6 +129,51 @@ const FLAG_INFO = {
     );
   } catch (err) {
     console.error(err);
+    console.error("use the --help flag for more information");
     process.exitCode = 1;
   }
 })();
+
+
+/** Returns help text */
+function help() {
+  return `A small script that provides build sizes to assist with optimization
+
+Usage: build-sizes <path> [options]
+
+Repository
+  https://github.com/benelan/build-sizes
+ 
+Arguments
+  path [required]
+    Path to the build directory
+
+Options
+  -b, --binary [boolean]
+    Convert bytes to human readable format in base 2 (default is base 10)
+
+  -d, --decimals
+    Decimal places for rounding bytes to a human readable format (default is 2)
+
+  -f, --filetype
+    Filetype of the main bundle (default is js)
+
+  -o, --outfile
+    Path to a file where the build sizes will be saved as CSV data.
+
+  -p, --path [same as argument]:
+    Path to the build directory is also available as an option
+
+Examples
+  # simplest usage with sane defaults
+  build-sizes dist                           
+
+  # can set values with a space or equals sign
+  build-sizes dist --filetype css --binary -d=1       
+
+  # use a flag for path if it isn't the first argument
+  build-sizes -b -p dist
+
+  # save the build sizes to a csv
+  build-sizes dist -o data/build-sizes.csv`;
+}
