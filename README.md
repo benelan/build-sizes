@@ -178,7 +178,7 @@ You could even add it as a `postpublish` script to keep track of your build size
 ```diff
  "scripts": {
     "publish": "... && npm publish",
-+   "postpublish": "build-sizes dist --outfile=.metrics.csv",
++   "postpublish": "build-sizes dist -o=sizes.csv",
     ...
 ```
 The `saveBuildSizes` function is also exported! So you can use it in your scripts like the snippet above did with `getBuildSizes`.
