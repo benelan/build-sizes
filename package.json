@@ -23,15 +23,14 @@
     "require": "./dist/index.cjs"
   },
   "bin": {
-    "build-sizes": "./dist/cli-log.js",
-    "build-sizes-save": "./dist/cli-save.js"
+    "build-sizes": "./dist/cli.js"
   },
   "files": [
     "dist/**"
   ],
   "scripts": {
-    "build:esm": "esbuild ./src/index.js ./src/cli-log.js ./src/cli-save.js --outdir=./dist --bundle --format=esm --minify --platform=node",
-    "build:cjs": "esbuild ./src/index.js --outfile=./dist/index.cjs --format=cjs --bundle --minify --platform=node",
+    "build:esm": "esbuild ./src/index.js ./src/cli.js --outdir=./dist --bundle --format=esm --minify --platform=node",
+    "build:cjs": "esbuild ./src/index.js --outfile=./dist/index.cjs --bundle --format=cjs --minify --platform=node",
     "build": "npm run build:esm && npm run build:cjs",
     "prepublish": "npm test && npm run build",
     "docs": "npx jsdoc index.js -r README.md -d docs",

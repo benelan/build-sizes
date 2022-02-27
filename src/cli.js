@@ -3,11 +3,6 @@ import { getBuildSizes, saveBuildSizes, formatBytes } from "./index.js";
 import { resolve } from "path";
 
 const FLAG_INFO = {
-  path: {
-    description: "Path to the build directory",
-    required: true,
-    value: undefined,
-  },
   binary: {
     description:
       "Convert bytes to human readable format in base 2 (default is base 10)",
@@ -28,8 +23,13 @@ const FLAG_INFO = {
   },
   outfile: {
     description:
-      "Path to a file where the build sizes will be saved as CSV data.",
+      "Path to a file where the build sizes will be saved as CSV data",
     required: false,
+    value: undefined,
+  },
+  path: {
+    description: "Path to the build directory (also available as an argument)",
+    required: true,
     value: undefined,
   },
 };
@@ -47,20 +47,26 @@ const FLAG_INFO = {
     const flagNameRegex = (f) => new RegExp("--" + f);
     const flagAliasRegex = (f) => new RegExp("-" + f.charAt(0));
 
+    // I know, this is a pretty stanky way to read flags
+    // but at this scale it should be fine
+    // well, as long as no one pipes in a PhD thesis
     args.forEach((a, i) => {
       flagKeys.forEach((flag) => {
+        // check if the argument matches a flag
         if (flagNameRegex(flag).test(a) || flagAliasRegex(flag).test(a)) {
-          if (a.includes("=")) {
-            const value = a.substring(a.indexOf("=") + 1);
-            FLAG_INFO[flag].value = value;
-          } else if (FLAG_INFO[flag]?.boolean === true) {
+          // flag with value after "=" e.g. --path=dist/xyz
+          if (a.includes("="))
+            FLAG_INFO[flag].value = a.substring(a.indexOf("=") + 1);
+          // flag with no input value e.g. --binary
+          else if (FLAG_INFO[flag]?.boolean === true)
             FLAG_INFO[flag].value = !FLAG_INFO[flag].value;
-          } else if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
+          // flag with value after space e.g. --path dist/xyz
+          else if (args.length > i + 1 && !args[i + 1].startsWith("-"))
             FLAG_INFO[flag].value = args[i + 1];
-          } else {
+          /** @todo need better error handling to explain why it failed */ else
             throw new Error(`unable to parse value for: "${flag}" flag`);
-          }
           console.log(`${flag}: ${FLAG_INFO[flag].value}`);
+          // path can also be first argument with no flag
         } else if (i === 0 && !a.startsWith("-") && !FLAG_INFO.path.value) {
           FLAG_INFO.path.value = a;
           console.log("path: ", a);
@@ -72,7 +78,8 @@ const FLAG_INFO = {
       throw new Error("The path to the build directory is required.");
     }
 
-    // get values for flags, some of which are likely defaults
+    // get values for flags
+    // some of which are likely still defaults
     const type = FLAG_INFO["filetype"].value;
     const decimals = FLAG_INFO["decimals"].value;
     const path = resolve(FLAG_INFO["path"].value);
@@ -95,7 +102,7 @@ const FLAG_INFO = {
       buildFileCount,
     } = buildSizes;
 
-    // logging
+    // make logs look noice
     const title = "|> Application Build Sizes <|";
     const line = "~".repeat(title.length);
     const underline = (text) => `\x1b[4m${text}\x1b[0m`;
@@ -129,14 +136,27 @@ const FLAG_INFO = {
     );
   } catch (err) {
     console.error(err);
-    console.error("use the --help flag for more information");
+    console.error("Use the -h or --help flag for usage information.");
     process.exitCode = 1;
   }
 })();
 
-
-/** Returns help text */
+/**
+ * @returns CLI help message
+ * */
 function help() {
+  // parse options help message from FLAG_INFO object
+  const req = (flag) => (FLAG_INFO[flag].required ? "[required]" : "");
+  const bool = (flag) => (FLAG_INFO[flag].boolean ? "[boolean]" : "");
+
+  const options = Object.keys(FLAG_INFO)
+    .map(
+      (f) =>
+        `  -${f.charAt(0)}, --${f} ${req(f)} ${bool(f)}
+     ${FLAG_INFO[f].description}`
+    )
+    .join("\n\n");
+
   return `A small script that provides build sizes to assist with optimization
 
 Usage: build-sizes <path> [options]
@@ -146,23 +166,10 @@ Repository
  
 Arguments
   path [required]
-    Path to the build directory
+     Path to the build directory
 
 Options
-  -b, --binary [boolean]
-    Convert bytes to human readable format in base 2 (default is base 10)
-
-  -d, --decimals
-    Decimal places for rounding bytes to a human readable format (default is 2)
-
-  -f, --filetype
-    Filetype of the main bundle (default is js)
-
-  -o, --outfile
-    Path to a file where the build sizes will be saved as CSV data.
-
-  -p, --path [same as argument]:
-    Path to the build directory is also available as an option
+${options}
 
 Examples
   # simplest usage with sane defaults
