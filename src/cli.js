@@ -114,7 +114,7 @@ function parseOptions(args) {
     if (arg.startsWith("-")) {
       const option = arg.split("=");
       // remove one or two dashes
-      const flag = option[0].replace(/^--?/, "");
+      const flag = option[0].replace(/^-*/, "");
       // if there is no value then it is treated as a boolean
       const value = option.length > 1 ? option[1] : true;
       options[flag] = value;
