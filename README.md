@@ -128,8 +128,8 @@ import { appendFile, readFile, writeFile } from "fs/promises";
 import { getBuildSizes } from "build-sizes";
 
 const ARGUMENT_ERROR = `Two required arguments (in order):
-- path to the build directory
-- path of the output csv file`;
+    - path to the build directory
+    - path of the output csv file`;
 
 (async () => {
   try {
@@ -148,16 +148,20 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
       .join(",")
       .concat("\n");
 
-    // write header if output file doesn't exist (errors if it does)
-    await writeFile(outfile, header, { flag: "wx" });
+    try {
+      // write csv header if outfile doesn't exist
+      await writeFile(outfile, header, { flag: "wx" });
+    } catch (err) {
+      // don't throw error if outfile does exists
+      if (err.code !== "EEXIST") {
+        throw new Error(err);
+      }
+    }
     // append build size info to csv
     await appendFile(outfile, row);
   } catch (err) {
-    // don't catch error from writeFile if output file exists
-    if (err.code !== "EEXIST") {
-      console.error(err);
-      process.exit(1);
-    }
+    console.error(err);
+    process.exit(1);
   }
 })();
 ```

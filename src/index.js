@@ -17,8 +17,8 @@ const execBash = promisify(exec);
  * @returns {string} human readable file size with units
  */
 const formatBytes = (bytes, decimals = 2, binary = false) => {
-  // I prefer human readable sizes. 
-  // Don't like it? byte me! 
+  // I prefer human readable sizes.
+  // Don't like it? byte me!
   try {
     if (!bytes) return "0 B";
     const k = binary ? 1024 : 1000;
@@ -73,7 +73,10 @@ const getFiles = async (directoryPath) => {
     return Promise.all(files);
   } catch (err) {
     if (err.code === "ENOENT") {
-      help("Error: Could not find build at specified path:\n   ", directoryPath);
+      help(
+        "Error: Could not find build at specified path:\n   ",
+        directoryPath
+      );
     } else {
       help(
         err,
@@ -144,14 +147,14 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
     const build = resolve(process.cwd(), buildPath);
     const buildFiles = await getFiles(build);
     const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
-    
+
     // the file with the largest size by type
     const mainBundleFile = filteredBuildFiles.length
       ? filteredBuildFiles.reduce((max, file) =>
           max.size > file.size ? max : file
         )
       : null;
-    
+
     // the largest file size by type
     const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
     const mainBundleName = mainBundleFile ? mainBundleFile.name : "Not found";
@@ -207,7 +210,7 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
   try {
     const outfile = resolve(outputPath);
     const version = JSON.parse(await readFile("package.json", "utf8")).version;
-    
+
     const timestamp = new Intl.DateTimeFormat("default", {
       dateStyle: "short",
       timeStyle: "long",
@@ -229,23 +232,28 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
       .join(",")
       .concat("\n");
 
-    // write header if output file doesn't exist (errors if it does)
-    await writeFile(outfile, header, { flag: "wx" });
+    try {
+      // write csv header if outfile doesn't exist
+      await writeFile(outfile, header, { flag: "wx" });
+    } catch (err) {
+      // don't throw error if outfile does exists
+      if (err.code !== "EEXIST") {
+        help(
+          err,
+          "\n\nOccurred while saving build sizes.",
+          "Double check the output path:\n   ",
+          resolve(outputPath)
+        );
+      }
+    }
     // append build size info to csv
     await appendFile(outfile, row);
   } catch (err) {
     if (err.code === "ENOENT" && err.path === "package.json") {
       help(
-        "Error saving build sizes to CSV. I must be called from the same directory as package.json to log the project version number. I recommended adding me as an NPM script so I can be called anywhere in the project."
-      );
-    }
-    // don't catch error from writeFile if output file exists
-    if (err.code !== "EEXIST") {
-      help(
-        err,
-        "\n\nOccurred while saving build sizes.",
-        "Double check the output path:\n   ",
-        resolve(outputPath)
+        "Error saving build sizes to CSV.",
+        "I must be called from the same directory as package.json to log the project version number.",
+        "I recommended adding me as an NPM script so I can be called anywhere in the project."
       );
     }
   }
@@ -297,5 +305,5 @@ export {
   getFileSizeGzip,
   getFileSizeBrotli,
   filterFilesByType,
-  help
+  help,
 };
