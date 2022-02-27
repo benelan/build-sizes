@@ -228,7 +228,7 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
     const row = [version, timestamp, ...Object.values(buildSizes)]
       .join(",")
       .concat("\n");
-    throw new Error("byte me")
+
     // write header if output file doesn't exist (errors if it does)
     await writeFile(outfile, header, { flag: "wx" });
     // append build size info to csv
