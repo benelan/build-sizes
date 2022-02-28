@@ -69,6 +69,13 @@ let loadingInterval; // loading animation interval
       buildFileCount,
     } = buildSizes;
 
+    // build size bytes in human readable format
+    const buildSizeFormatted = formatBytes(buildSize, decimals, binary);
+    const buildOnDiskFormatted = formatBytes(buildSizeOnDisk, decimals, binary);
+    const bundleSizeFormatted = formatBytes(mainBundleSize, decimals, binary);
+    const gzipFormatted = formatBytes(mainBundleSizeGzip, decimals, binary);
+    const brotliFormatted = formatBytes(mainBundleSizeBrotli, decimals, binary);
+
     // remove loading animation
     toggleLoadingAnimation();
 
@@ -76,33 +83,36 @@ let loadingInterval; // loading animation interval
     const title = "|> Application Build Sizes <|";
     const line = "-".repeat(title.length);
     const bundle = `Main ${type.toUpperCase()} bundle`;
-    // underlines text using ansi codes
-    const underline = (text) => `\x1b[4m${text}\x1b[0m`;
+    // bold and underline text using ansi codes
+    const boldUnderline = (text) => `\u001b[1m\x1b[4m${text}\x1b[0m`;
 
     console.log(
       `\n${line}\n${title}\n${line}`,
-      `\n${underline("Build")}`,
+      `\n${boldUnderline("Build")}`,
       "\n --> file count:",
       buildFileCount,
       "\n --> size:",
-      formatBytes(buildSize, decimals, binary),
-      buildSizeOnDisk // uses the unix du command
-        ? `\n --> on-disk size: ${formatBytes(
-            buildSizeOnDisk,
-            decimals,
-            binary
-          )}`
-        : "", // not supported on Windows
+      // for number syntax highlighting
+      Number(buildSizeFormatted.slice(0, -3)),
+      buildSizeFormatted.slice(-2),
+      // on disk size uses the unix du command
+      // which is not supported on Windows
+      buildSizeOnDisk ? "\n --> on-disk size:" : "",
+      buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -3)) : "",
+      buildSizeOnDisk ? buildOnDiskFormatted.slice(-2) : "",
       `\n${line}`,
-      `\n${underline(bundle)}`,
+      `\n${boldUnderline(bundle)}`,
       `\n --> name:`,
       mainBundleName,
       `\n --> size:`,
-      formatBytes(mainBundleSize, decimals, binary),
+      Number(bundleSizeFormatted.slice(0, -3)),
+      bundleSizeFormatted.slice(-2),
       `\n --> gzip size:`,
-      formatBytes(mainBundleSizeGzip, decimals, binary),
+      Number(gzipFormatted.slice(0, -3)),
+      gzipFormatted.slice(-2),
       `\n --> brotli size:`,
-      formatBytes(mainBundleSizeBrotli, decimals, binary),
+      Number(brotliFormatted.slice(0, -3)),
+      brotliFormatted.slice(-2),
       `\n${line}\n`
     );
   } catch (err) {
