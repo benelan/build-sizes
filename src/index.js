@@ -304,5 +304,6 @@ export {
   getFiles,
   getFileSizeGzip,
   getFileSizeBrotli,
-  filterFilesByType
+  filterFilesByType,
+  help
 };

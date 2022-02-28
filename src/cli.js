@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { getBuildSizes, saveBuildSizes, formatBytes } from "./index.js";
+import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 
 const FLAG_INFO = {
   binary: {
@@ -139,7 +139,7 @@ function parseOptions(args) {
 function toggleLoadingAnimation() {
   if (!loadingInterval) {
     // clear interval for all exit types
-    [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(
+    [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(
       (event) => {
         process.once(event, toggleLoadingAnimation);
       }
@@ -159,20 +159,6 @@ function toggleLoadingAnimation() {
     // show cursor and delete loading icons
     process.stdout.write(`\u001B[2K\r\u001B[?25h`);
   }
-}
-
-/**
- * Prints help message to stderr, as well as any included parameters. Exits with code 1
- * @private
- * @since v3.1.0
- * @param  {...any} messages - info for stderr
- */
-function help(...messages) {
-  messages && console.error(...messages);
-  console.error("\nAdd the -h or --help flag for usage information.");
-  // clear loading animation
-  toggleLoadingAnimation();
-  process.exit(1);
 }
 
 /**
