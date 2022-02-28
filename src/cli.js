@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
+import { getBuildSizes, saveBuildSizes, formatBytes } from "./index.js";
 
 const FLAG_INFO = {
   binary: {
@@ -25,10 +25,13 @@ const FLAG_INFO = {
   },
 };
 
+let loadingInterval; // loading animation interval
+
 (async () => {
   try {
+    toggleLoadingAnimation();
     const args = process.argv.splice(2);
-    // provide help and exit asap
+    // if requested, provide help and exit asap
     if (!args.length || args.includes("-h") || args.includes("--help")) {
       help(getUsageMessage());
     }
@@ -53,6 +56,9 @@ const FLAG_INFO = {
 
     const buildSizes = await getBuildSizes(path, type);
 
+    // save build sizes if outfile is provided
+    if (outfile) saveBuildSizes(buildSizes, outfile);
+
     const {
       mainBundleName,
       mainBundleSize,
@@ -62,6 +68,9 @@ const FLAG_INFO = {
       buildSizeOnDisk,
       buildFileCount,
     } = buildSizes;
+
+    // remove loading animation
+    toggleLoadingAnimation();
 
     // make logs look noice
     const title = "|> Application Build Sizes <|";
@@ -95,9 +104,6 @@ const FLAG_INFO = {
       formatBytes(mainBundleSizeBrotli, decimals, binary),
       `\n${line}\n`
     );
-
-    // save build sizes if outfile is provided
-    if (outfile) saveBuildSizes(buildSizes, outfile);
   } catch (err) {
     help(err);
   }
@@ -113,9 +119,10 @@ function parseOptions(args) {
   args.forEach((arg) => {
     if (arg.startsWith("-")) {
       const option = arg.split("=");
-      // remove one or two dashes
+      // remove all leading dashes
       const flag = option[0].replace(/^-*/, "");
-      // if there is no value then it is treated as a boolean
+      // if there is no value then it is treated as a boolean flag
+      // this could use some error handling eventually
       const value = option.length > 1 ? option[1] : true;
       options[flag] = value;
     }
@@ -124,6 +131,53 @@ function parseOptions(args) {
 }
 
 /**
+ * Creates an animation interval on the first run,
+ * and clears the interval on any subsequent executions
+ * @private
+ * @since v3.1.0
+ */
+function toggleLoadingAnimation() {
+  if (!loadingInterval) {
+    // clear interval for all exit types
+    [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(
+      (event) => {
+        process.once(event, toggleLoadingAnimation);
+      }
+    );
+    // hide cursor
+    process.stdout.write("\u001B[?25l\r");
+    let count = 0;
+    loadingInterval = setInterval(() => {
+      if (count % 11 === 0)
+        // delete line, send cursor back to start, add emoji
+        process.stdout.write(`\u001B[2K\r${["🔨 ", "📏 "][count % 2]}`);
+      else process.stdout.write(".");
+      count += 1;
+    }, 100);
+  } else {
+    clearInterval(loadingInterval);
+    // show cursor and delete loading icons
+    process.stdout.write(`\u001B[2K\r\u001B[?25h`);
+  }
+}
+
+/**
+ * Prints help message to stderr, as well as any included parameters. Exits with code 1
+ * @private
+ * @since v3.1.0
+ * @param  {...any} messages - info for stderr
+ */
+function help(...messages) {
+  messages && console.error(...messages);
+  console.error("\nAdd the -h or --help flag for usage information.");
+  // clear loading animation
+  toggleLoadingAnimation();
+  process.exit(1);
+}
+
+/**
+ * @private
+ * @since v3.0.0
  * @returns CLI help message
  * */
 function getUsageMessage() {
@@ -132,8 +186,8 @@ function getUsageMessage() {
   const bool = (flag) => (FLAG_INFO[flag].boolean ? "[boolean]" : "");
   const def = (flag) =>
     FLAG_INFO[flag].default ? `(default is ${FLAG_INFO[flag].default})` : "";
-  
-  // format the info into a string
+
+  // format the option info
   const options = Object.keys(FLAG_INFO)
     .map(
       (f) =>

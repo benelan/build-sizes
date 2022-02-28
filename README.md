@@ -181,6 +181,6 @@ You could even add it as a `postpublish` script to keep track of your build size
 +   "postpublish": "build-sizes dist -o=sizes.csv",
     ...
 ```
-The `saveBuildSizes` function is also exported! So you can use it in your scripts like the snippet above did with `getBuildSizes`.
+The `saveBuildSizes` function is also exported, so you can use it in your scripts! 
 
-> **Note:** The save script assumes it runs from the projects root directory when getting the version from `package.json`. Adding it as an npm script is recommended so you can call it in any of the project's directories.
+> **Note:** The save script requires the current working directory to contain `package.json`, so it can read the project's version number. Adding it as an npm script is recommended so you can call it from any of the project's directories.
