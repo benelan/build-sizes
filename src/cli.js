@@ -74,8 +74,9 @@ let loadingInterval; // loading animation interval
 
     // make logs look noice
     const title = "|> Application Build Sizes <|";
-    const line = "~".repeat(title.length);
+    const line = "-".repeat(title.length);
     const bundle = `Main ${type.toUpperCase()} bundle`;
+    // underlines text using ansi codes
     const underline = (text) => `\x1b[4m${text}\x1b[0m`;
 
     console.log(
@@ -131,26 +132,32 @@ function parseOptions(args) {
 }
 
 /**
- * Creates an animation interval on the first run,
- * and clears the interval on any subsequent executions
+ * Uses ANSI Codes to creates an animation interval on the first run.
+ * Clears the interval on any subsequent executions.
  * @private
  * @since v3.1.0
  */
 function toggleLoadingAnimation() {
   if (!loadingInterval) {
     // clear interval for all exit types
-    [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(
-      (event) => {
-        process.once(event, toggleLoadingAnimation);
-      }
-    );
+    [
+      `exit`,
+      `SIGINT`,
+      `SIGUSR1`,
+      `SIGUSR2`,
+      `uncaughtException`,
+      `SIGTERM`,
+    ].forEach((event) => {
+      process.once(event, toggleLoadingAnimation);
+    });
     // hide cursor
     process.stdout.write("\u001B[?25l\r");
     let count = 0;
     loadingInterval = setInterval(() => {
       if (count % 11 === 0)
-        // delete line, send cursor back to start, add emoji
+        // reset animation: delete line, send cursor to start, add emoji
         process.stdout.write(`\u001B[2K\r${["🔨 ", "📏 "][count % 2]}`);
+      // add the ... animation
       else process.stdout.write(".");
       count += 1;
     }, 100);
@@ -162,6 +169,8 @@ function toggleLoadingAnimation() {
 }
 
 /**
+ * Parses the FLAG_INFO object for
+ * options and creates the usage message
  * @private
  * @since v3.0.0
  * @returns CLI help message
@@ -188,7 +197,7 @@ Usage: build-sizes <path> [options]
 
 Repository
   https://github.com/benelan/build-sizes
- 
+
 Arguments
   path [required]
      Path to the build directory
@@ -198,10 +207,10 @@ ${options}
 
 Examples
   # simplest usage with sane defaults
-  build-sizes dist                           
+  build-sizes dist
 
   # size of the largest css file with tweaked the number formatting
-  build-sizes dist --filetype=css --binary --decimals=1       
+  build-sizes dist --filetype=css --binary --decimals=1
 
   # same as above, but use a flag for path when it's not the first argument
   build-sizes -f=css -b -d=1 -p=dist

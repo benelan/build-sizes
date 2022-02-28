@@ -38,19 +38,19 @@ build-sizes build
 And the output to the console is:
 
 ```
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 |> Application Build Sizes <|
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-Build 
- --> file count: 419 
- --> size: 27.73 MB 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-Main JS bundle 
- --> name: main.6e924e92.js 
- --> size: 1.70 MB 
- --> gzip size: 462.92 KB 
- --> brotli size: 375.26 KB 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
+Build
+ --> file count: 419
+ --> size: 27.73 MB
+-----------------------------
+Main JS bundle
+ --> name: main.6e924e92.js
+ --> size: 1.70 MB
+ --> gzip size: 462.92 KB
+ --> brotli size: 375.26 KB
+-----------------------------
 
 ```
 
@@ -65,42 +65,52 @@ Providing the `-h` or `--help` flag will log usage information to the console, c
 <details>
 
 ### Arguments
+
 **path [required]**
+
 - Path to the build directory
 
 ### Options
 
-**-b, --binary  [boolean]**
-- Convert bytes to human readable format in base 2 instead of base 10 
+**-b, --binary [boolean]**
+
+- Convert bytes to human readable format in base 2 instead of base 10
 
 **-d, --decimals**
+
 - Number of decimal places for rounding bytes to a human readable format (default is 2)
 
 **-f, --filetype**
+
 - Filetype of the main bundle (default is js)
 
 **-o, --outfile**
-- Path to a file for saving build sizes as CSV data 
+
+- Path to a file for saving build sizes as CSV data
 
 **-p, --path [required]**
-- Path to the build directory (also available as argument) 
+
+- Path to the build directory (also available as argument)
 
 ### Examples
 
-`build-sizes dist` 
+`build-sizes dist`
+
 - Simplest usage with sane defaults
- 
+
 `build-sizes dist --filetype=css --binary --decimals=1`
+
 - Size of the largest css file with tweaked number formatting
-  
+
 `build-sizes -f=css -b -d=1 -p=dist`
+
 - Same as above, but use a flag for path when it's not the first argument
 
 `build-sizes dist --outfile=data/build-sizes.csv`
+
 - Save the build sizes to a csv
 
 </details>
-
 
 ### Running from an npm script
 
@@ -174,13 +184,13 @@ node save.js dist sizes.csv
 
 You could even add it as a `postpublish` script to keep track of your build sizes for each release! As a matter of fact, scratch that I'm adding it to the package 🚀
 
-
 ```diff
  "scripts": {
     "publish": "... && npm publish",
 +   "postpublish": "build-sizes dist -o=sizes.csv",
     ...
 ```
-The `saveBuildSizes` function is also exported, so you can use it in your scripts! 
+
+The `saveBuildSizes` function is also exported, so you can use it in your scripts!
 
 > **Note:** The save script requires the current working directory to contain `package.json`, so it can read the project's version number. Adding it as an npm script is recommended so you can call it from any of the project's directories.

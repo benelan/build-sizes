@@ -17,18 +17,16 @@ const execBash = promisify(exec);
  * @returns {string} human readable file size with units
  */
 const formatBytes = (bytes, decimals = 2, binary = false) => {
-  // I prefer human readable sizes.
-  // Don't like it? byte me!
   try {
     if (!bytes) return "0 B";
     const k = binary ? 1024 : 1000;
-    const n = binary ? [~~(Math.log10(bytes) / 3)] : ~~(Math.log2(bytes) / 10);
-    return (
-      (bytes / Math.pow(k, n)).toFixed(decimals) +
-      " " +
-      ("KMGTPEZY"[n - 1] || "") +
-      "B"
+    const n = Math.floor(
+      binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10
     );
+    // I prefer human readable sizes, don't like it? byte me!
+    return `${(bytes / Math.pow(k, n)).toFixed(decimals)} ${
+      "KMGTPEZY"[n - 1] || ""
+    }B`;
   } catch (err) {
     help(
       err,
@@ -267,7 +265,9 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
  */
 function help(...messages) {
   messages && console.error(...messages);
-  console.error("\nAdd the -h or --help flag for usage information.");
+  console.error(
+    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nCheck out the documentation when using the exported functions:\nhttps://benelan.github.io/build-sizes/global.html\n"
+  );
   process.exit(1);
 }
 
@@ -305,5 +305,5 @@ export {
   getFileSizeGzip,
   getFileSizeBrotli,
   filterFilesByType,
-  help
+  help,
 };
