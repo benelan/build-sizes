@@ -1,6 +1,6 @@
 {
   "name": "build-sizes",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A small script that provides build sizes to assist with optimization",
   "homepage": "https://benelan.github.io/build-sizes",
   "keywords": [
