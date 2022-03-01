@@ -38,7 +38,7 @@ let loadingInterval; // loading animation interval
     // parse CLI arguments for option flags
     const options = parseOptions(args);
 
-    // path can be the first cli argument or an option
+    // path can be the first cli argument or an option flag
     const path = !args[0].startsWith("-")
       ? args[0]
       : options["p"] || options["path"];
@@ -50,15 +50,14 @@ let loadingInterval; // loading animation interval
       options["f"] || options["filetype"] || FLAG_INFO["filetype"].default;
     const decimals =
       options["d"] || options["decimals"] || FLAG_INFO["decimals"].default;
-    const binary =
-      options["b"] || options["binary"] || FLAG_INFO["binary"].default;
-    const outfile = options["o"] || options["outfile"]; // no default
+    const binary = options["b"] || options["binary"]; // undefined is falsy
+    const outfile = options["o"] || options["outfile"];
 
     const buildSizes = await getBuildSizes(path, type);
 
     // save build sizes if outfile is provided
     if (outfile) saveBuildSizes(buildSizes, outfile);
-
+    console.log(binary);
     const {
       mainBundleName,
       mainBundleSize,
@@ -85,6 +84,8 @@ let loadingInterval; // loading animation interval
     const bundle = `Main ${type.toUpperCase()} bundle`;
     // bold and underline text using ansi codes
     const boldUnderline = (text) => `\u001b[1m\x1b[4m${text}\x1b[0m`;
+    // gets char lenth of size unit, byte is 1 and the rest are 2
+    const unitLength = (size) => size.match(/\s+\S*$/)[0].trim().length;
 
     console.log(
       `\n${line}\n${title}\n${line}`,
@@ -93,26 +94,29 @@ let loadingInterval; // loading animation interval
       buildFileCount,
       "\n --> size:",
       // for number syntax highlighting
-      Number(buildSizeFormatted.slice(0, -3)),
-      buildSizeFormatted.slice(-2),
+      Number(buildSizeFormatted.slice(0, -2)),
+      // units are one char if bytes, otherwise two
+      buildSizeFormatted.slice(-unitLength(buildSizeFormatted)),
       // on disk size uses the unix du command
       // which is not supported on Windows
       buildSizeOnDisk ? "\n --> on-disk size:" : "",
-      buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -3)) : "",
-      buildSizeOnDisk ? buildOnDiskFormatted.slice(-2) : "",
+      buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -2)) : "",
+      buildSizeOnDisk
+        ? buildOnDiskFormatted.slice(-unitLength(buildOnDiskFormatted))
+        : "",
       `\n${line}`,
       `\n${boldUnderline(bundle)}`,
       `\n --> name:`,
       mainBundleName,
       `\n --> size:`,
-      Number(bundleSizeFormatted.slice(0, -3)),
-      bundleSizeFormatted.slice(-2),
+      Number(bundleSizeFormatted.slice(0, -2)),
+      bundleSizeFormatted.slice(-unitLength(bundleSizeFormatted)),
       `\n --> gzip size:`,
-      Number(gzipFormatted.slice(0, -3)),
-      gzipFormatted.slice(-2),
+      Number(gzipFormatted.slice(0, -2)),
+      gzipFormatted.slice(-unitLength(gzipFormatted)),
       `\n --> brotli size:`,
-      Number(brotliFormatted.slice(0, -3)),
-      brotliFormatted.slice(-2),
+      Number(brotliFormatted.slice(0, -2)),
+      brotliFormatted.slice(-unitLength(brotliFormatted)),
       `\n${line}\n`
     );
   } catch (err) {
