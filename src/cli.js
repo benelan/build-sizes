@@ -32,9 +32,10 @@ let loadingInterval; // loading animation interval
     toggleLoadingAnimation();
     const args = process.argv.splice(2);
     // if requested, provide help and exit asap
-    if (!args.length || args.includes("-h") || args.includes("--help")) {
-      help(getUsageMessage());
-    }
+    const needsHelp =
+      !args.length || args.includes("-h") || args.includes("--help");
+    if (needsHelp) help(getUsageMessage());
+
     // parse CLI arguments for option flags
     const options = parseOptions(args);
 
@@ -57,7 +58,6 @@ let loadingInterval; // loading animation interval
 
     // save build sizes if outfile is provided
     if (outfile) saveBuildSizes(buildSizes, outfile);
-    console.log(binary);
     const {
       mainBundleName,
       mainBundleSize,
@@ -99,7 +99,7 @@ let loadingInterval; // loading animation interval
       buildSizeFormatted.slice(-unitLength(buildSizeFormatted)),
       // on disk size uses the unix du command
       // which is not supported on Windows
-      buildSizeOnDisk ? "\n --> on-disk size:" : "",
+      buildSizeOnDisk ? "\n --> size on disk:" : "",
       buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -2)) : "",
       buildSizeOnDisk
         ? buildOnDiskFormatted.slice(-unitLength(buildOnDiskFormatted))

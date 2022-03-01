@@ -266,7 +266,7 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
 function help(...messages) {
   messages && console.error(...messages);
   console.error(
-    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nCheck out the documentation when using the exported functions:\nhttps://benelan.github.io/build-sizes/global.html\n"
+    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nCheck out the documentation for the exported functions:\nhttps://benelan.github.io/build-sizes/global.html\n"
   );
   process.exit(1);
 }

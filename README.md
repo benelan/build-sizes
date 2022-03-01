@@ -51,7 +51,6 @@ Main JS bundle
  --> gzip size: 462.92 KB
  --> brotli size: 375.26 KB
 -----------------------------
-
 ```
 
 There are also options that you can provide with flags. For example, you can specify a filetype for the largest bundle size (default is "js"):
