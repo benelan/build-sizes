@@ -4,7 +4,7 @@ import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 const FLAG_INFO = {
   binary: {
     description:
-      "Convert bytes to human readable format in base 2 instead of base 10",
+      "Convert bytes to a human readable format in base 2 instead of base 10",
     boolean: true,
   },
   decimals: {
@@ -25,7 +25,11 @@ const FLAG_INFO = {
   },
 };
 
-let loadingInterval; // loading animation interval
+// bold and underline text using ansi codes
+const underline = (text) => `\x1b[4m${text}\x1b[0m`;
+const bold = (text) => `\u001b[1m${text}\x1b[0m`;
+// loading animation interval
+let loadingInterval;
 
 (async () => {
   try {
@@ -68,7 +72,7 @@ let loadingInterval; // loading animation interval
       buildFileCount,
     } = buildSizes;
 
-    // build size bytes in human readable format
+    // build sizes bytes in human readable format
     const buildSizeFormatted = formatBytes(buildSize, decimals, binary);
     const buildOnDiskFormatted = formatBytes(buildSizeOnDisk, decimals, binary);
     const bundleSizeFormatted = formatBytes(mainBundleSize, decimals, binary);
@@ -82,14 +86,12 @@ let loadingInterval; // loading animation interval
     const title = "|> Application Build Sizes <|";
     const line = "-".repeat(title.length);
     const bundle = `Main ${type.toUpperCase()} bundle`;
-    // bold and underline text using ansi codes
-    const boldUnderline = (text) => `\u001b[1m\x1b[4m${text}\x1b[0m`;
     // gets char lenth of size unit, byte is 1 and the rest are 2
     const unitLength = (size) => size.match(/\s+\S*$/)[0].trim().length;
 
     console.log(
       `\n${line}\n${title}\n${line}`,
-      `\n${boldUnderline("Build")}`,
+      `\n${underline("Build")}`,
       "\n --> file count:",
       buildFileCount,
       "\n --> size:",
@@ -105,7 +107,7 @@ let loadingInterval; // loading animation interval
         ? buildOnDiskFormatted.slice(-unitLength(buildOnDiskFormatted))
         : "",
       `\n${line}`,
-      `\n${boldUnderline(bundle)}`,
+      `\n${underline(bundle)}`,
       `\n --> name:`,
       mainBundleName,
       `\n --> size:`,
@@ -146,8 +148,8 @@ function parseOptions(args) {
 }
 
 /**
- * Uses ANSI Codes to creates an animation interval on the first run.
- * Clears the interval on any subsequent executions.
+ * Uses ANSI Codes to creates an animation interval on the first run,
+ * and clears the interval on any subsequent executions.
  * @private
  * @since v3.1.0
  */
@@ -183,8 +185,7 @@ function toggleLoadingAnimation() {
 }
 
 /**
- * Parses the FLAG_INFO object for
- * options and creates the usage message
+ * Parses the flag options and creates the usage message
  * @private
  * @since v3.0.0
  * @returns CLI help message
@@ -201,29 +202,31 @@ function getUsageMessage() {
     .map(
       (f) =>
         `  -${f.charAt(0)}, --${f} ${req(f)} ${bool(f)}
-     ${FLAG_INFO[f].description} ${def(f)}`
+      ${FLAG_INFO[f].description} ${def(f)}`
     )
     .join("\n\n");
 
-  return `A small script that provides build sizes to assist with optimization
+  return `
+A small script that provides build sizes to assist with optimization.
 
-Usage: build-sizes <path> [options]
+USAGE
+  build-sizes <path> [options]
 
-Repository
+REPOSITORY
   https://github.com/benelan/build-sizes
 
-Arguments
+ARGUMENTS
   path [required]
-     Path to the build directory
+      Path to the build directory
 
-Options
+OPTIONS
 ${options}
 
-Examples
+EXAMPLES
   # simplest usage with sane defaults
   build-sizes dist
 
-  # size of the largest css file with tweaked the number formatting
+  # size of the largest css file with tweaked number formatting
   build-sizes dist --filetype=css --binary --decimals=1
 
   # same as above, but use a flag for path when it's not the first argument
