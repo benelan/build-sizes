@@ -25,11 +25,52 @@ const FLAG_INFO = {
   },
 };
 
+/**
+ * Uses ANSI Codes to creates an animation interval on the first run,
+ * and clears the interval on any subsequent executions.
+ * @private
+ * @since v3.1.0
+ */
+const toggleLoadingAnimation = (() => {
+  let called = false;
+  let interval;
+
+  return () => {
+    if (!called) {
+      // clear interval for all exit event types
+      [
+        `exit`,
+        `SIGINT`,
+        `SIGUSR1`,
+        `SIGUSR2`,
+        `uncaughtException`,
+        `SIGTERM`,
+      ].forEach((event) => {
+        process.once(event, toggleLoadingAnimation);
+      });
+      // hide cursor
+      process.stdout.write("\u001B[?25l\r");
+      let count = 0;
+      interval = setInterval(() => {
+        if (count % 11 === 0)
+          // reset animation: delete line, send cursor to start, add emoji
+          process.stdout.write(`\u001B[2K\r${["🔨 ", "📏 "][count % 2]}`);
+        // add the ... animation
+        else process.stdout.write(".");
+        count += 1;
+      }, 100);
+      called = true;
+    } else {
+      clearInterval(interval);
+      // show cursor and delete loading message
+      process.stdout.write(`\u001B[2K\r\u001B[?25h`);
+    }
+  };
+})();
+
 // bold and underline text using ansi codes
 const underline = (text) => `\x1b[4m${text}\x1b[0m`;
 const bold = (text) => `\u001b[1m${text}\x1b[0m`;
-// loading animation interval
-let loadingInterval;
 
 (async () => {
   try {
@@ -138,50 +179,12 @@ function parseOptions(args) {
       const option = arg.split("=");
       // remove all leading dashes
       const flag = option[0].replace(/^-*/, "");
-      // if there is no value then it is treated as a boolean flag
-      // this could use some error handling eventually
+      // assumes flag is boolean if there is no value specified
       const value = option.length > 1 ? option[1] : true;
       options[flag] = value;
     }
   });
   return options;
-}
-
-/**
- * Uses ANSI Codes to creates an animation interval on the first run,
- * and clears the interval on any subsequent executions.
- * @private
- * @since v3.1.0
- */
-function toggleLoadingAnimation() {
-  if (!loadingInterval) {
-    // clear interval for all exit types
-    [
-      `exit`,
-      `SIGINT`,
-      `SIGUSR1`,
-      `SIGUSR2`,
-      `uncaughtException`,
-      `SIGTERM`,
-    ].forEach((event) => {
-      process.once(event, toggleLoadingAnimation);
-    });
-    // hide cursor
-    process.stdout.write("\u001B[?25l\r");
-    let count = 0;
-    loadingInterval = setInterval(() => {
-      if (count % 11 === 0)
-        // reset animation: delete line, send cursor to start, add emoji
-        process.stdout.write(`\u001B[2K\r${["🔨 ", "📏 "][count % 2]}`);
-      // add the ... animation
-      else process.stdout.write(".");
-      count += 1;
-    }, 100);
-  } else {
-    clearInterval(loadingInterval);
-    // show cursor and delete loading icons
-    process.stdout.write(`\u001B[2K\r\u001B[?25h`);
-  }
 }
 
 /**

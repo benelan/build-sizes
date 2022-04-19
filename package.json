@@ -35,7 +35,7 @@
     "prepublish": "npm run build",
     "docs": "npx jsdoc src/index.js -r README.md -d docs",
     "test": "echo \"no test specified\"",
-    "link": "npm rm -g build-sizes && npm i -g ."
+    "link": "npm run build && npm unlink -g build-sizes && npm link"
   },
   "license": "MIT",
   "repository": {
