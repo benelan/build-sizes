@@ -39,12 +39,12 @@ const toggleLoadingAnimation = (() => {
     if (!called) {
       // clear interval for all exit event types
       [
-        `exit`,
-        `SIGINT`,
-        `SIGUSR1`,
-        `SIGUSR2`,
-        `uncaughtException`,
-        `SIGTERM`,
+        "exit",
+        "SIGINT",
+        "SIGUSR1",
+        "SIGUSR2",
+        "uncaughtException",
+        "SIGTERM",
       ].forEach((event) => {
         process.once(event, toggleLoadingAnimation);
       });
@@ -63,7 +63,7 @@ const toggleLoadingAnimation = (() => {
     } else {
       clearInterval(interval);
       // show cursor and delete loading message
-      process.stdout.write(`\u001B[2K\r\u001B[?25h`);
+      process.stdout.write("\u001B[2K\r\u001B[?25h");
     }
   };
 })();
@@ -149,15 +149,15 @@ const bold = (text) => `\u001b[1m${text}\x1b[0m`;
         : "",
       `\n${line}`,
       `\n${underline(bundle)}`,
-      `\n --> name:`,
+      "\n --> name:",
       mainBundleName,
-      `\n --> size:`,
+      "\n --> size:",
       Number(bundleSizeFormatted.slice(0, -2)),
       bundleSizeFormatted.slice(-unitLength(bundleSizeFormatted)),
-      `\n --> gzip size:`,
+      "\n --> gzip size:",
       Number(gzipFormatted.slice(0, -2)),
       gzipFormatted.slice(-unitLength(gzipFormatted)),
-      `\n --> brotli size:`,
+      "\n --> brotli size:",
       Number(brotliFormatted.slice(0, -2)),
       brotliFormatted.slice(-unitLength(brotliFormatted)),
       `\n${line}\n`
