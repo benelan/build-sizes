@@ -8,15 +8,17 @@
     "size",
     "build",
     "performance",
-    "bundle"
+    "bundle",
+    "optimization",
+    "automation"
   ],
   "author": {
     "name": "Ben Elan",
     "url": "https://benelan.dev"
   },
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "export": {
     ".": "./dist/index.js",
     "import": "./dist/index.js",
@@ -26,7 +28,7 @@
     "build-sizes": "./dist/cli.js"
   },
   "files": [
-    "dist/**"
+    "./dist"
   ],
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs",
