@@ -29,13 +29,15 @@
     "dist/**"
   ],
   "scripts": {
-    "build:esm": "npx esbuild ./src/index.js ./src/cli.js --outdir=./dist --bundle --format=esm --minify --platform=node",
-    "build:cjs": "npx esbuild ./src/index.js --outfile=./dist/index.cjs --bundle --format=cjs --minify --platform=node",
     "build": "npm run build:esm && npm run build:cjs",
-    "prepublish": "npm run build",
+    "build:cjs": "npx esbuild ./src/index.js --outfile=./dist/index.cjs --bundle --format=cjs --minify --platform=node",
+    "build:esm": "npx esbuild ./src/index.js ./src/cli.js --outdir=./dist --bundle --format=esm --minify --platform=node",
     "docs": "npx jsdoc src/index.js -r README.md -d docs",
-    "test": "echo \"no test specified\"",
-    "link": "npm run build && npm unlink -g build-sizes && npm link"
+    "link": "npm run build && npm unlink -g build-sizes && npm link",
+    "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix",
+    "prepublish": "npm run lint:fix && npm run build",
+    "test": "echo \"no test specified\""
   },
   "license": "MIT",
   "repository": {
@@ -52,5 +54,49 @@
   "volta": {
     "node": "16.14.0",
     "npm": "8.5.0"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "ignorePatterns": [
+      "/dist",
+      "/docs"
+    ],
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-multiple-empty-lines": [
+        "error",
+        {
+          "max": 2
+        }
+      ],
+      "no-unneeded-ternary": "error",
+      "indent": [
+        "error",
+        2
+      ],
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "quotes": [
+        "error",
+        "double"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "no-cond-assign": [
+        "error",
+        "always"
+      ]
+    }
   }
 }
