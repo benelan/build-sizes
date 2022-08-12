@@ -19,7 +19,7 @@
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
-  "export": {
+  "exports": {
     ".": "./dist/index.js",
     "import": "./dist/index.js",
     "require": "./dist/index.cjs"
