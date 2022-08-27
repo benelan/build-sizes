@@ -59,6 +59,7 @@
 <p>Or try it out before installing:</p>
 <pre class="prettyprint source lang-bash"><code>npx build-sizes your/build/directory
 </code></pre>
+<br>
 <h2>Using the CLI</h2>
 <p>To run the script, you need to provide the path (absolute or relative) to the application's build directory. For example, <code>create-react-app</code> generates a directory named <code>build</code> for production (other common names include <code>dist</code> and <code>public</code>). Once the application is built, you can get the sizes by running the following from the application's root directory:</p>
 <pre class="prettyprint source lang-bash"><code>build-sizes build
@@ -83,6 +84,7 @@ Main JS bundle
 </code></pre>
 <p>Providing the <code>-h</code> or <code>--help</code> flag will log usage information to the console, copy/pasted here for convenience:</p>
 <details>
+  <summary>Usage info</summary>
 <h3>Arguments</h3>
 <p><strong>path [required]</strong></p>
 <ul>
@@ -110,25 +112,32 @@ Main JS bundle
 <li>Path to the build directory (also available as argument)</li>
 </ul>
 <h3>Examples</h3>
-<p><code>build-sizes dist</code></p>
 <ul>
-<li>Simplest usage with sane defaults</li>
-</ul>
-<p><code>build-sizes dist --filetype=css --binary --decimals=1</code></p>
-<ul>
-<li>Size of the largest css file with tweaked number formatting</li>
-</ul>
-<p><code>build-sizes -f=css -b -d=1 -p=dist</code></p>
-<ul>
-<li>Same as above, but use a flag for path when it's not the first argument</li>
-</ul>
-<p><code>build-sizes dist --outfile=data/build-sizes.csv</code></p>
-<ul>
-<li>Save the build sizes to a csv</li>
+<li>
+<p>Simplest usage with sane defaults</p>
+<pre class="prettyprint source"><code>build-sizes dist
+</code></pre>
+</li>
+<li>
+<p>Size of the largest css file with tweaked number formatting</p>
+<pre class="prettyprint source"><code>build-sizes dist --filetype=css --binary --decimals=1
+</code></pre>
+</li>
+<li>
+<p>Same as above, but use a flag for path when it's not the first argument</p>
+<pre class="prettyprint source"><code>build-sizes -f=css -b -d=1 -p=dist
+</code></pre>
+</li>
+<li>
+<p>Save the build sizes to a csv</p>
+<pre class="prettyprint source"><code>build-sizes dist --outfile=data/build-sizes.csv
+</code></pre>
+</li>
 </ul>
 </details>
+<br>
 <h3>Running from an npm script</h3>
-<p>Pro tip: you can get the sizes after every build by adding a <code>postbuild</code> npm script:</p>
+<p>Pro tip: you can view the sizes after every build by adding a <code>postbuild</code> npm script:</p>
 <pre class="prettyprint source lang-diff"><code> &quot;scripts&quot;: {
     &quot;start&quot;: &quot;react-scripts start&quot;,
     &quot;build&quot;: &quot;react-scripts build&quot;,
@@ -139,6 +148,7 @@ Main JS bundle
 ...
 </code></pre>
 <p>The sizes will be logged to the console after running <code>npm run build</code>.</p>
+<br>
 <h2>Using the functions</h2>
 <p>The package also exports functions, <a href="https://benelan.github.io/build-sizes/global.html">documented here</a>. They are available as both CommonJS and ECMAScript modules. Check out the <a href="https://github.com/benelan/build-sizes/blob/master/src/cli.js">CLI code</a> for a simple usage example that logs build sizes to the console. Here is another usage example that saves your project's build sizes, version, and a timestamp to a CSV file.</p>
 <pre class="prettyprint source lang-js"><code>import { appendFile, readFile, writeFile } from &quot;fs/promises&quot;;
@@ -186,6 +196,7 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
 <pre class="prettyprint source lang-bash"><code>node save.js dist sizes.csv
 </code></pre>
 <p>You could even add it as a <code>postpublish</code> script to keep track of your build sizes for each release! As a matter of fact, scratch that I'm adding it to the package 🚀</p>
+<p>Use the <code>-o</code> or <code>--outfile</code> flag to specify where the CSV file is saved:</p>
 <pre class="prettyprint source lang-diff"><code> &quot;scripts&quot;: {
     &quot;publish&quot;: &quot;... && npm publish&quot;,
 +   &quot;postpublish&quot;: &quot;build-sizes dist -o=sizes.csv&quot;,
@@ -193,7 +204,7 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
 </code></pre>
 <p>The <code>saveBuildSizes</code> function is also exported, so you can use it in your scripts!</p>
 <blockquote>
-<p><strong>Note:</strong> The save script requires the current working directory to contain <code>package.json</code>, so it can read the project's version number. Adding it as an npm script is recommended so you can call it from any of the project's directories.</p>
+<p><strong>Note:</strong> The save script requires the current working directory to contain <code>package.json</code> so it can grab the project's version number. Adding it as an npm script like the snippet above is recommended, which allows you to run the script from any directory in the project.</p>
 </blockquote></article>
     </section>
 
@@ -211,7 +222,7 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.10</a> on Tue Mar 01 2022 10:27:05 GMT-0800 (Pacific Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Fri Aug 26 2022 21:04:46 GMT-0700 (Pacific Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>
