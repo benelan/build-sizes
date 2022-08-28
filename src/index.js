@@ -207,7 +207,16 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
 const saveBuildSizes = async (buildSizes, outputPath) => {
   try {
     const outfile = resolve(outputPath);
-    const version = JSON.parse(await readFile("package.json", "utf8")).version;
+    let version = "";
+
+    try {
+      version = JSON.parse(await readFile("package.json", "utf8")).version;
+    } catch (err) {
+      if (err.code === "ENOENT" && err.path === "package.json")
+        console.warn(
+          "No package.json file found in the current working directory. The package version will not be specified.\n"
+        );
+    }
 
     const timestamp = new Intl.DateTimeFormat("default", {
       dateStyle: "short",
@@ -217,18 +226,17 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
       .replace(",", " at");
 
     // convert build-sizes output into csv header and row
-    const header = [
-      "Version",
-      "Timestamp",
-      ...Object.keys(buildSizes),
-      "(File sizes in bytes)",
-    ]
-      .join(",")
-      .concat("\n");
+    const header = (version ? "Version," : "").concat(
+      ["Timestamp", ...Object.keys(buildSizes), "(File sizes in bytes)"].join(
+        ","
+      ),
+      "\n"
+    );
 
-    const row = [version, timestamp, ...Object.values(buildSizes)]
-      .join(",")
-      .concat("\n");
+    const row = (version ? version + "," : "").concat(
+      [timestamp, ...Object.values(buildSizes)].join(","),
+      "\n"
+    );
 
     try {
       // write csv header if outfile doesn't exist
@@ -247,13 +255,7 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
     // append build size info to csv
     await appendFile(outfile, row);
   } catch (err) {
-    if (err.code === "ENOENT" && err.path === "package.json") {
-      help(
-        "Error saving build sizes to CSV.",
-        "I must be called from the same directory as package.json to log the project version number.",
-        "I recommended adding me as an NPM script so I can be called anywhere in the project."
-      );
-    }
+    help(err, "\n\nError saving build sizes to CSV.");
   }
 };
 
