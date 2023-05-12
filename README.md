@@ -31,7 +31,7 @@ npx build-sizes your/build/directory
 
 ## Using the CLI
 
-To run the script, you need to provide the path (absolute or relative) to the application's build directory. For example, `create-react-app` generates a directory named `build` for production (other common names include `dist` and `public`). Once the application is built, you can get the sizes by running the following from the application's root directory:
+To run the script, you need to provide the path (absolute or relative) to the application's build directory. For example, `create-react-app` generates a directory named `build` for production (other common names include `dist` and `public`). After building the application, you can get the sizes by running the following from the application's root directory:
 
 ```bash
 build-sizes build
@@ -39,7 +39,7 @@ build-sizes build
 
 And the output to the console is:
 
-```
+```sh
 -----------------------------
 |> Application Build Sizes <|
 -----------------------------
@@ -55,7 +55,7 @@ Main JS bundle
 -----------------------------
 ```
 
-There are also options that you can provide with flags. For example, you can specify a filetype for the largest bundle size (default is "js"):
+Flags are provided to change the default options. For example, you can specify a filetype for the largest bundle size (default is "js"):
 
 ```bash
 build-sizes build --filetype=css
@@ -97,24 +97,28 @@ Providing the `-h` or `--help` flag will log usage information to the console, c
 ### Examples
 
 - Simplest usage with sane defaults
-    ```
-    build-sizes dist
-    ```
+
+  ```sh
+  build-sizes dist
+  ```
 
 - Size of the largest css file with tweaked number formatting
-    ```
-    build-sizes dist --filetype=css --binary --decimals=1
-    ```
+
+  ```sh
+  build-sizes dist --filetype=css --binary --decimals=1
+  ```
 
 - Same as above, but use a flag for path when it's not the first argument
-    ```
-    build-sizes -f=css -b -d=1 -p=dist
-    ```
+
+  ```sh
+  build-sizes -f=css -b -d=1 -p=dist
+  ```
 
 - Save the build sizes to a csv
-    ```
-    build-sizes dist --outfile=data/build-sizes.csv
-    ```
+
+  ```sh
+  build-sizes dist --outfile=data/build-sizes.csv
+  ```
 
 </details>
 
@@ -194,7 +198,7 @@ node save.js dist sizes.csv
 
 You could even add it as a `postpublish` script to keep track of your build sizes for each release! As a matter of fact, scratch that I'm adding it to the package 🚀
 
-Use the `-o` or `--outfile` flag to specify where the CSV file is saved:
+Use the `-o` or `--outfile` flag to specify the CSV file's location:
 
 ```diff
  "scripts": {
@@ -205,4 +209,4 @@ Use the `-o` or `--outfile` flag to specify where the CSV file is saved:
 
 The `saveBuildSizes` function is also exported, so you can use it in your scripts!
 
-> **Note:** The save script requires the current working directory to contain `package.json` so it can grab the project's version number. Adding it as an npm script like the snippet above is recommended, which allows you to run the script from any directory in the project.
+> **Note:** The save script requires the current working directory to contain `package.json` so it can grab the project's version number. I recommend using an npm script like the snippet above, which allows you to run the script from any directory in the project.
