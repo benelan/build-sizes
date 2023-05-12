@@ -127,10 +127,11 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
     const title = "|> Application Build Sizes <|";
     const line = "-".repeat(title.length);
     const bundle = `Main ${type.toUpperCase()} bundle`;
-    
+
     // gets build size unit by determining char length
     // byte (B) is 1 char and the rest are 2 (KB, MB, etc.)
-    const sizeUnit = (size) => size.slice(-size.match(/\s+\S*$/)[0].trim().length);
+    const sizeUnit = (size) =>
+      size.slice(-size.match(/\s+\S*$/)[0].trim().length);
 
     console.log(
       `\n${line}\n${title}\n${line}`,
@@ -144,9 +145,7 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
       // on disk size uses the unix du command, which is not supported on Windows
       buildSizeOnDisk ? "\n --> size on disk:" : "",
       buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -2)) : "",
-      buildSizeOnDisk
-        ? sizeUnit(buildOnDiskFormatted)
-        : "",
+      buildSizeOnDisk ? sizeUnit(buildOnDiskFormatted) : "",
       `\n${line}`,
       `\n${underline(bundle)}`,
       "\n --> name:",
