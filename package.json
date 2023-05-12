@@ -33,6 +33,7 @@
     "build:cjs": "esbuild ./src/index.js --outfile=./dist/index.cjs --bundle --format=cjs --minify --platform=node",
     "build:esm": "esbuild ./src/index.js ./src/cli.js --outdir=./dist --bundle --format=esm --minify --platform=node",
     "docs": "jsdoc src/index.js -r README.md -d docs",
+    "format": "prettier --write .",
     "link": "npm run build && npm unlink -g build-sizes && npm link",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -41,7 +42,8 @@
   "devDependencies": {
     "esbuild": "^0.17.18",
     "eslint": "^8.40.0",
-    "jsdoc": "^4.0.2"
+    "jsdoc": "^4.0.2",
+    "prettier": "^2.8.8"
   },
   "license": "MIT",
   "repository": {
@@ -57,49 +59,5 @@
   "engineStrict": true,
   "volta": {
     "node": "16.20.0"
-  },
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "env": {
-      "node": true,
-      "es2022": true
-    },
-    "parserOptions": {
-      "sourceType": "module"
-    },
-    "ignorePatterns": [
-      "/dist",
-      "/docs"
-    ],
-    "rules": {
-      "no-unused-vars": "warn",
-      "no-multiple-empty-lines": [
-        "error",
-        {
-          "max": 2
-        }
-      ],
-      "no-unneeded-ternary": "error",
-      "indent": [
-        "error",
-        2
-      ],
-      "linebreak-style": [
-        "error",
-        "unix"
-      ],
-      "quotes": [
-        "error",
-        "double"
-      ],
-      "semi": [
-        "error",
-        "always"
-      ],
-      "no-cond-assign": [
-        "error",
-        "always"
-      ]
-    }
   }
 }
