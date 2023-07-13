@@ -34,7 +34,6 @@
     "build:esm": "esbuild ./src/index.js ./src/cli.js --outdir=./dist --bundle --format=esm --minify --platform=node",
     "docs": "jsdoc src/index.js -r README.md -d docs",
     "format": "prettier --write .",
-    "link": "npm run build && npm unlink -g build-sizes && npm link",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "echo \"no tests specified\""

@@ -50,22 +50,19 @@ const formatBytes = (bytes, decimals = 2, binary = false) => {
 const getFiles = async (directoryPath) => {
   try {
     const entries = await readdir(directoryPath, { withFileTypes: true });
-
-    const files = entries
-      .filter((file) => !file.isDirectory())
-      .map(async ({ name }) => {
-        const path = resolve(directoryPath, name);
+    const files = [];
+    for (const item of entries) {
+      if (!item.isDirectory()) {
+        const path = resolve(directoryPath, item.name);
         const { size } = await stat(path);
-        return { name, path, size };
-      });
-
-    const directories = entries.filter((folder) => folder.isDirectory());
-    for (const directory of directories) {
-      // recursive calls for subdirectories
-      const subdirectoryFiles = await getFiles(
-        resolve(directoryPath, directory.name)
-      );
-      files.push(...subdirectoryFiles);
+        files.push({ name: item.name, path, size });
+      } else {
+        // recursive calls for subdirectories
+        const subdirectoryFiles = await getFiles(
+          resolve(directoryPath, item.name)
+        );
+        files.push(...subdirectoryFiles);
+      }
     }
 
     return Promise.all(files);
