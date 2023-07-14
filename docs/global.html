@@ -43,7 +43,7 @@
           </h4>
 
           <div class="description">
-            Filters files by file type. Use
+            Filters files by filetype. Use
             <a href="global.html#getFiles">getFiles</a> to retrieve your build
             files.
           </div>
@@ -101,7 +101,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line96">line 96</a>
+                  <a href="index.js.html#line97">line 97</a>
                 </li>
               </ul>
             </dd>
@@ -237,7 +237,7 @@
           </h4>
 
           <div class="description">
-            Provides sizes for an application's production build.
+            Provides sizes for an application's build.
           </div>
 
           <h5>Parameters:</h5>
@@ -296,7 +296,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line143">line 143</a>
+                  <a href="index.js.html#line144">line 144</a>
                 </li>
               </ul>
             </dd>
@@ -313,6 +313,148 @@
                 >Promise.&lt;<a href="global.html#BuildSizes">BuildSizes</a
                 >></span
               >
+            </dd>
+          </dl>
+
+          <h4 class="name" id="getFileSizeBrotli">
+            <span class="type-signature"></span>getFileSizeBrotli<span
+              class="signature"
+              >(filePath)</span
+            ><span class="type-signature"> &rarr; {Promise.&lt;number>}</span>
+          </h4>
+
+          <div class="description">
+            Compresses a file using brotli and returns the size.
+          </div>
+
+          <h5>Parameters:</h5>
+
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Type</th>
+
+                <th class="last">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td class="name"><code>filePath</code></td>
+
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
+
+                <td class="description last">path of the file to compress</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-since">Since:</dt>
+            <dd class="tag-since">
+              <ul class="dummy">
+                <li>v3.0.0</li>
+              </ul>
+            </dd>
+
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li>
+                  <a href="index.js.html">index.js</a>,
+                  <a href="index.js.html#line125">line 125</a>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h5>Returns:</h5>
+
+          <div class="param-desc">
+            file size compressed using brotli with the default
+            <a href="https://nodejs.org/api/zlib.html#brotli-constants">zlib</a>
+            options
+          </div>
+
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;number></span>
+            </dd>
+          </dl>
+
+          <h4 class="name" id="getFileSizeGzip">
+            <span class="type-signature"></span>getFileSizeGzip<span
+              class="signature"
+              >(filePath)</span
+            ><span class="type-signature"> &rarr; {Promise.&lt;number>}</span>
+          </h4>
+
+          <div class="description">
+            Compresses a file using gzip and returns the size.
+          </div>
+
+          <h5>Parameters:</h5>
+
+          <table class="params">
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Type</th>
+
+                <th class="last">Description</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td class="name"><code>filePath</code></td>
+
+                <td class="type">
+                  <span class="param-type">string</span>
+                </td>
+
+                <td class="description last">path of the file to compress</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <dl class="details">
+            <dt class="tag-since">Since:</dt>
+            <dd class="tag-since">
+              <ul class="dummy">
+                <li>v3.0.0</li>
+              </ul>
+            </dd>
+
+            <dt class="tag-source">Source:</dt>
+            <dd class="tag-source">
+              <ul class="dummy">
+                <li>
+                  <a href="index.js.html">index.js</a>,
+                  <a href="index.js.html#line106">line 106</a>
+                </li>
+              </ul>
+            </dd>
+          </dl>
+
+          <h5>Returns:</h5>
+
+          <div class="param-desc">
+            file size compressed using gzip with the default
+            <a href="https://nodejs.org/api/zlib.html#class-options">zlib</a>
+            options
+          </div>
+
+          <dl>
+            <dt>Type</dt>
+            <dd>
+              <span class="param-type">Promise.&lt;number></span>
             </dd>
           </dl>
 
@@ -371,7 +513,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line50">line 50</a>
+                  <a href="index.js.html#line51">line 51</a>
                 </li>
               </ul>
             </dd>
@@ -390,148 +532,6 @@
                 >Promise.&lt;Array.&lt;<a href="global.html#File">File</a
                 >>></span
               >
-            </dd>
-          </dl>
-
-          <h4 class="name" id="getFileSizeBrotli">
-            <span class="type-signature"></span>getFileSizeBrotli<span
-              class="signature"
-              >(filePath)</span
-            ><span class="type-signature"> &rarr; {Promise.&lt;number>}</span>
-          </h4>
-
-          <div class="description">
-            Compresses a file using brotli and returns the size (no write)
-          </div>
-
-          <h5>Parameters:</h5>
-
-          <table class="params">
-            <thead>
-              <tr>
-                <th>Name</th>
-
-                <th>Type</th>
-
-                <th class="last">Description</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td class="name"><code>filePath</code></td>
-
-                <td class="type">
-                  <span class="param-type">string</span>
-                </td>
-
-                <td class="description last">path of the file to compress</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <dl class="details">
-            <dt class="tag-since">Since:</dt>
-            <dd class="tag-since">
-              <ul class="dummy">
-                <li>v3.0.0</li>
-              </ul>
-            </dd>
-
-            <dt class="tag-source">Source:</dt>
-            <dd class="tag-source">
-              <ul class="dummy">
-                <li>
-                  <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line124">line 124</a>
-                </li>
-              </ul>
-            </dd>
-          </dl>
-
-          <h5>Returns:</h5>
-
-          <div class="param-desc">
-            file size compressed using brotli with the default
-            <a href="https://nodejs.org/api/zlib.html#brotli-constants">zlib</a>
-            options
-          </div>
-
-          <dl>
-            <dt>Type</dt>
-            <dd>
-              <span class="param-type">Promise.&lt;number></span>
-            </dd>
-          </dl>
-
-          <h4 class="name" id="getFileSizeGzip">
-            <span class="type-signature"></span>getFileSizeGzip<span
-              class="signature"
-              >(filePath)</span
-            ><span class="type-signature"> &rarr; {Promise.&lt;number>}</span>
-          </h4>
-
-          <div class="description">
-            Compresses a file using gzip and returns the size (no write)
-          </div>
-
-          <h5>Parameters:</h5>
-
-          <table class="params">
-            <thead>
-              <tr>
-                <th>Name</th>
-
-                <th>Type</th>
-
-                <th class="last">Description</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td class="name"><code>filePath</code></td>
-
-                <td class="type">
-                  <span class="param-type">string</span>
-                </td>
-
-                <td class="description last">path of the file to compress</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <dl class="details">
-            <dt class="tag-since">Since:</dt>
-            <dd class="tag-since">
-              <ul class="dummy">
-                <li>v3.0.0</li>
-              </ul>
-            </dd>
-
-            <dt class="tag-source">Source:</dt>
-            <dd class="tag-source">
-              <ul class="dummy">
-                <li>
-                  <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line105">line 105</a>
-                </li>
-              </ul>
-            </dd>
-          </dl>
-
-          <h5>Returns:</h5>
-
-          <div class="param-desc">
-            file size compressed using gzip with the default
-            <a href="https://nodejs.org/api/zlib.html#class-options">zlib</a>
-            options
-          </div>
-
-          <dl>
-            <dt>Type</dt>
-            <dd>
-              <span class="param-type">Promise.&lt;number></span>
             </dd>
           </dl>
 
@@ -603,7 +603,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line207">line 207</a>
+                  <a href="index.js.html#line208">line 208</a>
                 </li>
               </ul>
             </dd>
@@ -732,7 +732,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line286">line 286</a>
+                  <a href="index.js.html#line288">line 288</a>
                 </li>
               </ul>
             </dd>
@@ -810,7 +810,7 @@
               <ul class="dummy">
                 <li>
                   <a href="index.js.html">index.js</a>,
-                  <a href="index.js.html#line274">line 274</a>
+                  <a href="index.js.html#line276">line 276</a>
                 </li>
               </ul>
             </dd>
@@ -845,9 +845,9 @@
         <li><a href="global.html#filterFilesByType">filterFilesByType</a></li>
         <li><a href="global.html#formatBytes">formatBytes</a></li>
         <li><a href="global.html#getBuildSizes">getBuildSizes</a></li>
-        <li><a href="global.html#getFiles">getFiles</a></li>
         <li><a href="global.html#getFileSizeBrotli">getFileSizeBrotli</a></li>
         <li><a href="global.html#getFileSizeGzip">getFileSizeGzip</a></li>
+        <li><a href="global.html#getFiles">getFiles</a></li>
         <li><a href="global.html#saveBuildSizes">saveBuildSizes</a></li>
       </ul>
     </nav>
@@ -856,8 +856,8 @@
 
     <footer>
       Documentation generated by
-      <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a> on Fri Aug 26
-      2022 21:04:46 GMT-0700 (Pacific Daylight Time)
+      <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Jul 13
+      2023 18:19:15 GMT-0700 (Pacific Daylight Time)
     </footer>
 
     <script>
