@@ -21,7 +21,7 @@ function formatBytes(bytes, decimals = 2, binary = false) {
     if (!bytes) return "0 B";
     const k = binary ? 1024 : 1000;
     const n = Math.floor(
-      binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10
+      binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10,
     );
 
     // I prefer human readable sizes, don't like it? byte me!
@@ -37,7 +37,7 @@ function formatBytes(bytes, decimals = 2, binary = false) {
       "\n    decimals:",
       decimals,
       "\n    binary:",
-      binary
+      binary,
     );
   }
 }
@@ -62,7 +62,7 @@ async function getFiles(directoryPath) {
       } else {
         // recursive calls for subdirectories
         const subdirectoryFiles = await getFiles(
-          resolve(directoryPath, item.name)
+          resolve(directoryPath, item.name),
         );
 
         files.push(...subdirectoryFiles);
@@ -74,14 +74,14 @@ async function getFiles(directoryPath) {
     if (err.code === "ENOENT") {
       help(
         "Error: Could not find build at specified path:\n   ",
-        directoryPath
+        directoryPath,
       );
     } else {
       help(
         err,
         "\n\nOccurred while finding build files.",
         "Double check the file path:\n   ",
-        directoryPath
+        directoryPath,
       );
     }
   }
@@ -112,8 +112,8 @@ const getFileSizeGzip = (filePath) =>
         err,
         "\n\nOccurred while getting gzipped file size.",
         "Double check the file path:\n   ",
-        filePath
-      )
+        filePath,
+      ),
     );
 
 /**
@@ -131,8 +131,8 @@ const getFileSizeBrotli = (filePath) =>
         err,
         "\n\nOccurred while getting brotli compressed file size.",
         "Double check the file path:\n   ",
-        filePath
-      )
+        filePath,
+      ),
     );
 
 /**
@@ -150,7 +150,7 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
     // the file with the largest size by type
     const mainBundleFile = filteredBuildFiles.length
       ? filteredBuildFiles.reduce((max, file) =>
-          max.size > file.size ? max : file
+          max.size > file.size ? max : file,
         )
       : null;
 
@@ -194,7 +194,7 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
       "\n    build path:",
       resolve(buildPath),
       "\n    bundle filetype:",
-      bundleFileType
+      bundleFileType,
     );
   }
 }
@@ -215,7 +215,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
     } catch (err) {
       if (err.code === "ENOENT" && err.path === "package.json")
         console.warn(
-          "No package.json file found in the current working directory. The package version will not be specified.\n"
+          "No package.json file found in the current working directory. The package version will not be specified.\n",
         );
     }
 
@@ -248,7 +248,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
           err,
           "\n\nOccurred while saving build sizes.",
           "Double check the output path:\n   ",
-          resolve(outputPath)
+          resolve(outputPath),
         );
       }
     }
@@ -268,7 +268,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
 function help(...messages) {
   messages && console.error(...messages);
   console.error(
-    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nRead the documentation for assistance with the exported functions:\n  https://benelan.github.io/build-sizes/global.html\n"
+    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nRead the documentation for assistance with the exported functions:\n  https://benelan.github.io/build-sizes/global.html\n",
   );
   process.exit(1);
 }

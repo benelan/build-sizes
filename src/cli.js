@@ -169,7 +169,7 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
       "\n --> brotli size:",
       Number(brotliFormatted.slice(0, -2)),
       sizeUnit(brotliFormatted),
-      `\n${line}\n`
+      `\n${line}\n`,
     );
   } catch (err) {
     help(err);
@@ -214,7 +214,7 @@ function getUsageMessage() {
     .map(
       (f) =>
         `  -${f.charAt(0)}, --${f} ${req(f)} ${bool(f)}
-      ${FLAG_INFO[f].description} ${def(f)}`
+      ${FLAG_INFO[f].description} ${def(f)}`,
     )
     .join("\n\n");
 
