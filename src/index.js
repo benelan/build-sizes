@@ -16,17 +16,18 @@ const execBash = promisify(exec);
  * @param {boolean} [binary=false] - binary or decimal unit conversion
  * @returns {string} human readable file size with units
  */
-const formatBytes = (bytes, decimals = 2, binary = false) => {
+function formatBytes(bytes, decimals = 2, binary = false) {
   try {
     if (!bytes) return "0 B";
     const k = binary ? 1024 : 1000;
     const n = Math.floor(
       binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10
     );
+
     // I prefer human readable sizes, don't like it? byte me!
-    return `${(bytes / Math.pow(k, n)).toFixed(decimals)} ${
-      "KMGTPEZY"[n - 1] || ""
-    }B`;
+    const value = (bytes / Math.pow(k, n)).toFixed(decimals);
+    const unit = `${"KMGTPEZY"[n - 1] || ""}B`;
+    return `${value} ${unit}`;
   } catch (err) {
     help(
       err,
@@ -39,7 +40,7 @@ const formatBytes = (bytes, decimals = 2, binary = false) => {
       binary
     );
   }
-};
+}
 
 /**
  * Returns all files in a directory (recursive).
@@ -47,20 +48,23 @@ const formatBytes = (bytes, decimals = 2, binary = false) => {
  * @param {string} directoryPath - path to the directory containing the files
  * @returns {Promise<File[]>} all files in the directory and subdirectories
  */
-const getFiles = async (directoryPath) => {
+async function getFiles(directoryPath) {
   try {
     const entries = await readdir(directoryPath, { withFileTypes: true });
     const files = [];
+
     for (const item of entries) {
       if (!item.isDirectory()) {
         const path = resolve(directoryPath, item.name);
         const { size } = await stat(path);
+
         files.push({ name: item.name, path, size });
       } else {
         // recursive calls for subdirectories
         const subdirectoryFiles = await getFiles(
           resolve(directoryPath, item.name)
         );
+
         files.push(...subdirectoryFiles);
       }
     }
@@ -81,10 +85,10 @@ const getFiles = async (directoryPath) => {
       );
     }
   }
-};
+}
 
 /**
- * Filters files by file type. Use {@link getFiles} to retrieve your build files.
+ * Filters files by filetype. Use {@link getFiles} to retrieve your build files.
  * @since v2.2.0
  * @param {File[]} files - files to filter
  * @param {string} type - file type, e.g. "js", "tsx", etc.
@@ -94,7 +98,7 @@ const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
 
 /**
- * Compresses a file using gzip and returns the size (no write)
+ * Compresses a file using gzip and returns the size.
  * @since v3.0.0
  * @param {string} filePath - path of the file to compress
  * @returns {Promise<number>} file size compressed using gzip with the default [zlib]{@link https://nodejs.org/api/zlib.html#class-options} options
@@ -113,7 +117,7 @@ const getFileSizeGzip = (filePath) =>
     );
 
 /**
- * Compresses a file using brotli and returns the size (no write)
+ * Compresses a file using brotli and returns the size.
  * @since v3.0.0
  * @param {string} filePath - path of the file to compress
  * @returns {Promise<number>} file size compressed using brotli with the default [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
@@ -132,12 +136,12 @@ const getFileSizeBrotli = (filePath) =>
     );
 
 /**
- * Provides sizes for an application's production build.
+ * Provides sizes for an application's build.
  * @param {string} buildPath - path to the build directory
  * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", etc.
  * @returns {Promise<BuildSizes>} build sizes
  */
-const getBuildSizes = async (buildPath, bundleFileType = "js") => {
+async function getBuildSizes(buildPath, bundleFileType = "js") {
   try {
     const build = resolve(process.cwd(), buildPath);
     const buildFiles = await getFiles(build);
@@ -193,7 +197,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
       bundleFileType
     );
   }
-};
+}
 
 /**
  * Saves the build sizes from {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
@@ -201,7 +205,7 @@ const getBuildSizes = async (buildPath, bundleFileType = "js") => {
  * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
  * @param {string} outputPath - the path to the output file, e.g. data/build-sizes.csv
  */
-const saveBuildSizes = async (buildSizes, outputPath) => {
+async function saveBuildSizes(buildSizes, outputPath) {
   try {
     const outfile = resolve(outputPath);
     let version = "";
@@ -222,22 +226,21 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
       .format(Date.now())
       .replace(",", " at");
 
-    // convert build-sizes output into csv header and row
-    const header = (version ? "Version," : "").concat(
-      ["Timestamp", ...Object.keys(buildSizes), "(File sizes in bytes)"].join(
-        ","
-      ),
-      "\n"
-    );
+    const header = [version ? "Version," : "", "Timestamp"];
+    const row = [version ? `${version},` : "", timestamp];
 
-    const row = (version ? version + "," : "").concat(
-      [timestamp, ...Object.values(buildSizes)].join(","),
-      "\n"
-    );
+    for (const [key, value] of Object.entries(buildSizes)) {
+      header.push(key);
+      row.push(value);
+    }
+
+    header.push("(File sizes in bytes)");
+    const headerString = `${header.join(",")}\n`;
+    const rowString = `${row.join(",")}\n`;
 
     try {
       // write csv header if outfile doesn't exist
-      await writeFile(outfile, header, { flag: "wx" });
+      await writeFile(outfile, headerString, { flag: "wx" });
     } catch (err) {
       // don't throw error if outfile does exists
       if (err.code !== "EEXIST") {
@@ -250,11 +253,11 @@ const saveBuildSizes = async (buildSizes, outputPath) => {
       }
     }
     // append build size info to csv
-    await appendFile(outfile, row);
+    await appendFile(outfile, rowString);
   } catch (err) {
     help(err, "\n\nError saving build sizes to CSV.");
   }
-};
+}
 
 /**
  * Prints help message to stderr, as well as any included parameters. Exits with code 1

@@ -133,6 +133,8 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
     const sizeUnit = (size) =>
       size.slice(-size.match(/\s+\S*$/)[0].trim().length);
 
+    // This code smells like a brown bag full of glue
+    // It's staying
     console.log(
       `\n${line}\n${title}\n${line}`,
       `\n${underline("Build")}`,
