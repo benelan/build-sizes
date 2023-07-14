@@ -2,6 +2,11 @@
 import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 
 const FLAG_INFO = {
+  loader: {
+    description:
+      "Show a loading animation while determining the build size (doesn't work when executed via npx)",
+    boolean: true,
+  },
   binary: {
     description:
       "Convert bytes to a human readable format in base 2 instead of base 10",
@@ -74,7 +79,6 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
 
 (async () => {
   try {
-    toggleLoadingAnimation();
     const args = process.argv.splice(2);
     // if requested, provide help and exit asap
     const needsHelp =
@@ -91,13 +95,17 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
 
     if (!path) help("Error: The path to the build directory is required.");
 
+    const loader = options["l"] || options["loader"];
+    loader && toggleLoadingAnimation();
+
+    const binary = options["b"] || options["binary"]; // undefined is falsy
+    const outfile = options["o"] || options["outfile"];
+
     // set options parsed by flag, otherwise use defaults
     const type =
       options["f"] || options["filetype"] || FLAG_INFO["filetype"].default;
     const decimals =
       options["d"] || options["decimals"] || FLAG_INFO["decimals"].default;
-    const binary = options["b"] || options["binary"]; // undefined is falsy
-    const outfile = options["o"] || options["outfile"];
 
     const buildSizes = await getBuildSizes(path, type);
 
@@ -121,7 +129,7 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
     const brotliFormatted = formatBytes(mainBundleSizeBrotli, decimals, binary);
 
     // remove loading animation
-    toggleLoadingAnimation();
+    loader && toggleLoadingAnimation();
 
     // make logs look noice
     const title = "|> Application Build Sizes <|";

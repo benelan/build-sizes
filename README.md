@@ -58,10 +58,21 @@ Main JS bundle
 Flags are provided to change the default options. For example, you can specify a filetype for the largest bundle size (default is "js"):
 
 ```bash
-build-sizes build --filetype=css
+build-sizes dist --filetype=css
 ```
 
-Providing the `-h` or `--help` flag will log usage information to the console, copy/pasted here for convenience:
+The argument parsing logic is very simple and requires the equals sign (`=`) between the flag and its value. Additionally, short flags cannot be grouped together into a single argument. Here are a couple examples of what will and won't work:
+
+```sh
+# These two are incorrect
+build-sizes dist -lb           # the -l and -b flags are combined into a single argument
+build-sizes dist --decimals 4  # there is a space between --decimals and its value
+
+# This one is correct
+build-sizes dist -l -b --decimals=4
+```
+
+The `-h` or `--help` flag will log usage information to the console, copy/pasted here for convenience:
 
 <details>
   <summary>Usage info</summary>
@@ -73,6 +84,10 @@ Providing the `-h` or `--help` flag will log usage information to the console, c
 - Path to the build directory
 
 ### Options
+
+**-l, --loader [boolean]**
+
+- Show a loading animation while determining the build size (doesn't work when executed via npx)
 
 **-b, --binary [boolean]**
 
