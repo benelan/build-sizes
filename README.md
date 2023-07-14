@@ -87,7 +87,7 @@ The `-h` or `--help` flag will log usage information to the console, copy/pasted
 
 **-l, --loader [boolean]**
 
-- Show a loading animation while determining the build size (doesn't work when executed via npx)
+- Show a loading animation while determining the build size
 
 **-b, --binary [boolean]**
 

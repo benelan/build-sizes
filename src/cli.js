@@ -4,7 +4,7 @@ import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 const FLAG_INFO = {
   loader: {
     description:
-      "Show a loading animation while determining the build size (doesn't work when executed via npx)",
+      "Show a loading animation while determining the build size",
     boolean: true,
   },
   binary: {
@@ -244,6 +244,6 @@ EXAMPLES
   # same as above, but use a flag for path when it's not the first argument
   build-sizes -f=css -b -d=1 -p=dist
 
-  # save the build sizes to a csv
-  build-sizes dist --outfile=data/build-sizes.csv`;
+  # save the build sizes to a csv and display a loading animation
+  build-sizes dist --loader --outfile=data/build-sizes.csv`;
 }
