@@ -31,8 +31,9 @@ const FLAG_INFO = {
 };
 
 /**
- * Uses ANSI Codes to creates an animation interval on the first run,
- * and clears the interval on any subsequent executions.
+ * Use ANSI Codes to create an animation interval on the first run, and clear
+ * the interval on any subsequent executions.
+ *
  * @private
  * @since v3.1.0
  */
@@ -177,9 +178,11 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
 })();
 
 /**
- * Parses CLI arguments for option flags
- * @param {Array<string>} args - CLI arguments from node
- * @returns {Object.<string>} Dictionary of options and their corresponding values
+ * Parse CLI arguments for option flags.
+ *
+ * @private
+ * @param {Array<string>} args - command line arguments from node
+ * @returns {Object.<string>} - flags (as keys) and their values
  */
 function parseOptions(args) {
   const options = {};
@@ -197,7 +200,8 @@ function parseOptions(args) {
 }
 
 /**
- * Parses the flag options and creates the usage message
+ * Format the flag options and create the usage message.
+ *
  * @private
  * @since v3.0.0
  * @returns CLI help message
