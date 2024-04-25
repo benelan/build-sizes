@@ -55,6 +55,8 @@ Main JS bundle
 -----------------------------
 ```
 
+> **NOTE:** The "main bundle" file is naively chosen by largest file size, it doesn't use a dependency graph. This script is minimal by design, check out [`webpack-bundle-analyzer`](https://github.com/webpack-contrib/webpack-bundle-analyzer) for a more complex bundle size tool.
+
 Flags are provided to change the default options. For example, you can specify a filetype for the largest bundle size (default is "js"):
 
 ```bash
