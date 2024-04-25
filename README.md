@@ -9,21 +9,22 @@ A small script that provides build sizes to assist with optimization.
 
 ## Installation
 
-Install [the package](https://www.npmjs.com/package/build-sizes) globally and use it anywhere:
+Install [the package](https://www.npmjs.com/package/build-sizes) globally and
+use it anywhere:
 
-```bash
+```sh
 npm i -g build-sizes
 ```
 
 Use it in a single application:
 
-```bash
+```sh
 npm i -D build-sizes
 ```
 
 Or try it out before installing:
 
-```bash
+```sh
 npx build-sizes your/build/directory
 ```
 
@@ -31,9 +32,13 @@ npx build-sizes your/build/directory
 
 ## Using the CLI
 
-To run the script, you need to provide the path (absolute or relative) to the application's build directory. For example, `create-react-app` generates a directory named `build` for production (other common names include `dist` and `public`). After building the application, you can get the sizes by running the following from the application's root directory:
+To run the script, you need to provide the path (absolute or relative) to the
+application's build directory. For example, `create-react-app` generates a
+directory named `build` for production (other common names include `dist` and
+`public`). After building the application, you can get the sizes by running the
+following from the application's root directory:
 
-```bash
+```sh
 build-sizes build
 ```
 
@@ -55,26 +60,34 @@ Main JS bundle
 -----------------------------
 ```
 
-> **NOTE:** The "main bundle" file is naively chosen by largest file size, it doesn't use a dependency graph. This script is minimal by design, check out [`webpack-bundle-analyzer`](https://github.com/webpack-contrib/webpack-bundle-analyzer) for a more complex bundle size tool.
+> **NOTE:** The "main bundle" file is naively chosen by largest file size, it
+> doesn't use a dependency graph. This script is minimal by design, check out
+> [`webpack-bundle-analyzer`](https://github.com/webpack-contrib/webpack-bundle-analyzer)
+> for a more complex bundle size tool.
 
-Flags are provided to change the default options. For example, you can specify a filetype for the largest bundle size (default is "js"):
+Flags are provided to change the default options. For example, you can specify a
+filetype for the largest bundle size (default is "js"):
 
-```bash
+```sh
 build-sizes dist --filetype=css
 ```
 
-The argument parsing logic is very simple and requires the equals sign (`=`) between the flag and its value. Additionally, short flags cannot be grouped together into a single argument. Here are a couple examples of what will and won't work:
+The argument parsing logic is very simple and requires the equals sign (`=`)
+between the flag and its value. Additionally, short flags cannot be grouped
+together into a single argument. Here are a couple examples of what will and
+won't work:
 
 ```sh
 # These two are incorrect
-build-sizes dist -lb           # the -l and -b flags are combined into a single argument
-build-sizes dist --decimals 4  # there is a space between --decimals and its value
+build-sizes dist -lb           # -l and -b flags combined into a single argument
+build-sizes dist --decimals 4  # space between --decimals flag and its value
 
 # This one is correct
 build-sizes dist -l -b --decimals=4
 ```
 
-The `-h` or `--help` flag will log usage information to the console, copy/pasted here for convenience:
+The `-h` or `--help` flag will log usage information to the console, copy/pasted
+here for convenience:
 
 <details>
   <summary>Usage info</summary>
@@ -97,7 +110,8 @@ The `-h` or `--help` flag will log usage information to the console, copy/pasted
 
 **-d, --decimals**
 
-- Number of decimal places for rounding bytes to a human readable format (default is 2)
+- Number of decimal places for rounding bytes to a human readable format
+  (default is 2)
 
 **-f, --filetype**
 
@@ -143,7 +157,8 @@ The `-h` or `--help` flag will log usage information to the console, copy/pasted
 
 ### Running from an npm script
 
-Pro tip: you can view the sizes after every build by adding a `postbuild` npm script:
+Pro tip: you can view the sizes after every build by adding a `postbuild` npm
+script:
 
 ```diff
  "scripts": {
@@ -162,7 +177,13 @@ The sizes will be logged to the console after running `npm run build`.
 
 ## Using the functions
 
-The package also exports functions, [documented here](https://benelan.github.io/build-sizes/global.html). They are available as both CommonJS and ECMAScript modules. Check out the [CLI code](https://github.com/benelan/build-sizes/blob/master/src/cli.js) for a simple usage example that logs build sizes to the console. Here is another usage example that saves your project's build sizes, version, and a timestamp to a CSV file.
+The package also exports functions,
+[documented here](https://benelan.github.io/build-sizes/global.html). They are
+available as both CommonJS and ECMAScript modules. Check out the
+[CLI code](https://github.com/benelan/build-sizes/blob/master/src/cli.js) for a
+simple usage example that logs build sizes to the console. Here is another usage
+example that saves your project's build sizes, version, and a timestamp to a CSV
+file.
 
 ```js
 import { appendFile, readFile, writeFile } from "fs/promises";
@@ -207,13 +228,16 @@ const ARGUMENT_ERROR = `Two required arguments (in order):
 })();
 ```
 
-You can use the example by providing the paths to the build directory and output CSV file:
+You can use the example by providing the paths to the build directory and output
+CSV file:
 
-```bash
+```sh
 node save.js dist sizes.csv
 ```
 
-You could even add it as a `postpublish` script to keep track of your build sizes for each release! As a matter of fact, scratch that I'm adding it to the package 🚀
+You could even add it as a `postpublish` script to keep track of your build
+sizes for each release! As a matter of fact, scratch that I'm adding it to the
+package 🚀
 
 Use the `-o` or `--outfile` flag to specify the CSV file's location:
 
@@ -224,6 +248,10 @@ Use the `-o` or `--outfile` flag to specify the CSV file's location:
     ...
 ```
 
-The `saveBuildSizes` function is also exported, so you can use it in your scripts!
+The `saveBuildSizes` function is also exported, so you can use it in your
+scripts!
 
-> **Note:** The save script requires the current working directory to contain `package.json` so it can grab the project's version number. I recommend using an npm script like the snippet above, which allows you to run the script from any directory in the project.
+> **Note:** The save script requires the current working directory to contain
+> `package.json` so it can grab the project's version number. I recommend using
+> an npm script like the snippet above, which allows you to run the script from
+> any directory in the project.
