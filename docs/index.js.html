@@ -24,26 +24,40 @@
       <section>
         <article>
           <pre class="prettyprint source linenums"><code>#!/usr/bin/env node
-import { resolve } from "path";
-import { readdir, stat, readFile, appendFile, writeFile } from "fs/promises";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { gzip, brotliCompress } from "zlib";
-const compressGzip = promisify(gzip);
-const compressBrotli = promisify(brotliCompress);
-const execBash = promisify(exec);
+import { resolve } from "node:path";
+import {
+  readdir,
+  stat,
+  readFile,
+  appendFile,
+  writeFile,
+} from "node:fs/promises";
+import { promisify } from "node:util";
+import { exec as execSync } from "node:child_process";
+import {
+  gzip as gzipSync,
+  brotliCompress as brotliCompressSync,
+} from "node:zlib";
+
+const exec = promisify(execSync);
+const gzip = promisify(gzipSync);
+const brotliCompress = promisify(brotliCompressSync);
 
 /**
- * Formats bytes to a human readable size.
+ * Format bytes to a human readable size.
+ *
  * @since v2.1.0
  * @param {number} bytes - bytes to format
- * @param {number} [decimals=2] - decimal precision for rounding
- * @param {boolean} [binary=false] - binary or decimal unit conversion
+ * @param {number} [decimals] - decimal precision for rounding
+ * @param {boolean} [binary] - binary or decimal unit conversion
  * @returns {string} human readable file size with units
  */
 function formatBytes(bytes, decimals = 2, binary = false) {
   try {
-    if (!bytes) return "0 B";
+    if (!bytes) {
+      return "0 B";
+    }
+
     const k = binary ? 1024 : 1000;
     const n = Math.floor(
       binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10,
@@ -68,52 +82,46 @@ function formatBytes(bytes, decimals = 2, binary = false) {
 }
 
 /**
- * Returns all files in a directory (recursive).
+ * Find sizes of all files in a directory (recursive).
+ *
  * @since v2.1.0
- * @param {string} directoryPath - path to the directory containing the files
+ * @param {string} parentDir - path to the directory containing the files
  * @returns {Promise&lt;File[]>} all files in the directory and subdirectories
  */
-async function getFiles(directoryPath) {
+async function getFiles(parentDir) {
   try {
-    const entries = await readdir(directoryPath, { withFileTypes: true });
     const files = [];
+    const entries = await readdir(parentDir, {
+      withFileTypes: true,
+      recursive: true,
+    });
 
-    for (const item of entries) {
-      if (!item.isDirectory()) {
-        const path = resolve(directoryPath, item.name);
-        const { size } = await stat(path);
-
-        files.push({ name: item.name, path, size });
-      } else {
-        // recursive calls for subdirectories
-        const subdirectoryFiles = await getFiles(
-          resolve(directoryPath, item.name),
-        );
-
-        files.push(...subdirectoryFiles);
+    for (const dirent of entries) {
+      if (dirent.isFile()) {
+        const itemPath = resolve(dirent.path, dirent.name);
+        const { size } = await stat(itemPath);
+        files.push({ name: dirent.name, path: itemPath, size });
       }
     }
 
     return Promise.all(files);
   } catch (err) {
     if (err.code === "ENOENT") {
-      help(
-        "Error: Could not find build at specified path:\n   ",
-        directoryPath,
-      );
+      help("Error: Could not find build at specified path:\n   ", parentDir);
     } else {
       help(
         err,
         "\n\nOccurred while finding build files.",
         "Double check the file path:\n   ",
-        directoryPath,
+        parentDir,
       );
     }
   }
 }
 
 /**
- * Filters files by filetype. Use {@link getFiles} to retrieve your build files.
+ * Filter files by filetype. Use {@link getFiles} to retrieve the build files.
+ *
  * @since v2.2.0
  * @param {File[]} files - files to filter
  * @param {string} type - file type, e.g. "js", "tsx", etc.
@@ -123,14 +131,16 @@ const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
 
 /**
- * Compresses a file using gzip and returns the size.
+ * Compress a file using gzip and return the size.
+ *
  * @since v3.0.0
  * @param {string} filePath - path of the file to compress
- * @returns {Promise&lt;number>} file size compressed using gzip with the default [zlib]{@link https://nodejs.org/api/zlib.html#class-options} options
+ * @returns {Promise&lt;number>} gzip-compressed byte size using the default
+ *   [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
 const getFileSizeGzip = (filePath) =>
   readFile(filePath)
-    .then(compressGzip)
+    .then(gzip)
     .then((output) => output.length)
     .catch((err) =>
       help(
@@ -142,14 +152,16 @@ const getFileSizeGzip = (filePath) =>
     );
 
 /**
- * Compresses a file using brotli and returns the size.
+ * Compress a file using brotli and return the size.
+ *
  * @since v3.0.0
  * @param {string} filePath - path of the file to compress
- * @returns {Promise&lt;number>} file size compressed using brotli with the default [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
+ * @returns {Promise&lt;number>} brotli-compressed byte size using the default
+ *   [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
 const getFileSizeBrotli = (filePath) =>
   readFile(filePath)
-    .then(compressBrotli)
+    .then(brotliCompress)
     .then((output) => output.length)
     .catch((err) =>
       help(
@@ -161,9 +173,10 @@ const getFileSizeBrotli = (filePath) =>
     );
 
 /**
- * Provides sizes for an application's build.
+ * Determine metrics related to an application's build size.
+ *
  * @param {string} buildPath - path to the build directory
- * @param {string} [bundleFileType="js"] - type of bundle files, e.g. "js", "css", etc.
+ * @param {string} [bundleFileType] - file type of bundle, e.g. "js", "css", etc.
  * @returns {Promise&lt;BuildSizes>} build sizes
  */
 async function getBuildSizes(buildPath, bundleFileType = "js") {
@@ -194,10 +207,10 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
     // sum of all file sizes
     const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
 
-    // the du command is not available on windows
+    // the `du` command is not available on windows
     const buildSizeOnDisk =
       process.platform !== "win32"
-        ? Number((await execBash(`du -sb ${build} | cut -f1`)).stdout.trim())
+        ? Number((await exec(`du -sb ${build} | cut -f1`)).stdout.trim())
         : NaN;
 
     const buildFileCount = buildFiles.length;
@@ -225,10 +238,12 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
 }
 
 /**
- * Saves the build sizes from {@link getBuildSizes} to a CSV file. Useful for tracking sizes over time.
+ * Save the results from {@link getBuildSizes} to a CSV file. Useful for
+ * tracking build sizes over time, e.g., in a CI/CD pipeline.
+ *
  * @since v3.0.0
  * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
- * @param {string} outputPath - the path to the output file, e.g. data/build-sizes.csv
+ * @param {string} outputPath - path of the output file, e.g. build/size.csv
  */
 async function saveBuildSizes(buildSizes, outputPath) {
   try {
@@ -238,10 +253,12 @@ async function saveBuildSizes(buildSizes, outputPath) {
     try {
       version = JSON.parse(await readFile("package.json", "utf8")).version;
     } catch (err) {
-      if (err.code === "ENOENT" &amp;&amp; err.path === "package.json")
+      if (err.code === "ENOENT" &amp;&amp; err.path === "package.json") {
         console.warn(
-          "No package.json file found in the current working directory. The package version will not be specified.\n",
+          "No package.json file found in the current working directory.",
+          "The package version will not be specified.\n",
         );
+      }
     }
 
     const timestamp = new Intl.DateTimeFormat("default", {
@@ -261,7 +278,6 @@ async function saveBuildSizes(buildSizes, outputPath) {
 
     header.push("(File sizes in bytes)");
     const headerString = `${header.join(",")}\n`;
-    const rowString = `${row.join(",")}\n`;
 
     try {
       // write csv header if outfile doesn't exist
@@ -277,7 +293,9 @@ async function saveBuildSizes(buildSizes, outputPath) {
         );
       }
     }
+
     // append build size info to csv
+    const rowString = `${row.join(",")}\n`;
     await appendFile(outfile, rowString);
   } catch (err) {
     help(err, "\n\nError saving build sizes to CSV.");
@@ -285,7 +303,8 @@ async function saveBuildSizes(buildSizes, outputPath) {
 }
 
 /**
- * Prints help message to stderr, as well as any included parameters. Exits with code 1
+ * Print a help message to stderr and exit with code 1.
+ *
  * @private
  * @since v3.0.0
  * @param  {...any} messages - info for stderr
@@ -293,14 +312,17 @@ async function saveBuildSizes(buildSizes, outputPath) {
 function help(...messages) {
   messages &amp;&amp; console.error(...messages);
   console.error(
-    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nRead the documentation for assistance with the exported functions:\n  https://benelan.github.io/build-sizes/global.html\n",
+    "\nAdd the -h or --help flag for usage information when on the CLI.\n",
+    "\nRead the documentation for assistance with the exported functions:",
+    "\nhttps://benelan.github.io/build-sizes/global.html",
   );
   process.exit(1);
 }
 
 /**
- * Important information about a file.
- * @typedef {Object} File
+ * Information about a file.
+ *
+ * @typedef {object} File
  * @property {string} name - file name with type
  * @property {string} path - absolute file path
  * @property {string} size - uncompressed file size
@@ -311,13 +333,14 @@ function help(...messages) {
  */
 
 /**
- * Information about a project's build sizes, primarily used for optimization.
- * @typedef {Object} BuildSizes
+ * Information about an application's build sizes.
+ *
+ * @typedef {object} BuildSizes
  * @property {string} mainBundleName - name of the largest bundle size by type
- * @property {number} mainBundleSize - size in bytes of the largest bundle file by type
- * @property {number} mainBundleSizeGzip - size in bytes of the main bundle file compressed with gzip
- * @property {number} mainBundleSizeBrotli - size in bytes of the main bundle file  compressed with brotli
- * @property {number} buildSize - size in bytes of all files in the build directory
+ * @property {number} mainBundleSize - byte size of the largest bundle file by type
+ * @property {number} mainBundleSizeGzip - gzip-compressed byte size of the main bundle file
+ * @property {number} mainBundleSizeBrotli - brotli-compressed byte size of the main bundle file
+ * @property {number} buildSize - byte size of all files in the build directory
  * @property {number} buildSizeOnDisk -  on-disk size in bytes of the build directory. Not available on Windows.
  * @property {number} buildFileCount - count of all files in the build directory
  * @see {@link getBuildSizes}
@@ -357,8 +380,8 @@ export {
 
     <footer>
       Documentation generated by
-      <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Jul 13
-      2023 18:34:29 GMT-0700 (Pacific Daylight Time)
+      <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Apr 25
+      2024 05:02:04 GMT-0700 (Pacific Daylight Time)
     </footer>
 
     <script>
