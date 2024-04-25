@@ -60,43 +60,35 @@ function formatBytes(bytes, decimals = 2, binary = false) {
  * Find sizes of all files in a directory (recursive).
  *
  * @since v2.1.0
- * @param {string} directoryPath - path to the directory containing the files
+ * @param {string} parentDir - path to the directory containing the files
  * @returns {Promise<File[]>} all files in the directory and subdirectories
  */
-async function getFiles(directoryPath) {
+async function getFiles(parentDir) {
   try {
-    const entries = await readdir(directoryPath, { withFileTypes: true });
     const files = [];
+    const entries = await readdir(parentDir, {
+      withFileTypes: true,
+      recursive: true,
+    });
 
-    for (const item of entries) {
-      if (!item.isDirectory()) {
-        const path = resolve(directoryPath, item.name);
-        const { size } = await stat(path);
-
-        files.push({ name: item.name, path, size });
-      } else {
-        // recursive calls for subdirectories
-        const subdirectoryFiles = await getFiles(
-          resolve(directoryPath, item.name),
-        );
-
-        files.push(...subdirectoryFiles);
+    for (const dirent of entries) {
+      if (dirent.isFile()) {
+        const itemPath = resolve(dirent.path, dirent.name);
+        const { size } = await stat(itemPath);
+        files.push({ name: dirent.name, path: itemPath, size });
       }
     }
 
     return Promise.all(files);
   } catch (err) {
     if (err.code === "ENOENT") {
-      help(
-        "Error: Could not find build at specified path:\n   ",
-        directoryPath,
-      );
+      help("Error: Could not find build at specified path:\n   ", parentDir);
     } else {
       help(
         err,
         "\n\nOccurred while finding build files.",
         "Double check the file path:\n   ",
-        directoryPath,
+        parentDir,
       );
     }
   }
