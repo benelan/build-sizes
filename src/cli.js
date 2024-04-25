@@ -3,8 +3,7 @@ import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 
 const FLAG_INFO = {
   loader: {
-    description:
-      "Show a loading animation while determining the build size",
+    description: "Show a loading animation while determining the build size",
     boolean: true,
   },
   binary: {
@@ -142,8 +141,7 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
     const sizeUnit = (size) =>
       size.slice(-size.match(/\s+\S*$/)[0].trim().length);
 
-    // This code smells like a brown bag full of glue
-    // It's staying
+    // This code smells like a brown bag full of glue...
     console.log(
       `\n${line}\n${title}\n${line}`,
       `\n${underline("Build")}`,
@@ -153,7 +151,7 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
       // for number syntax highlighting
       Number(buildSizeFormatted.slice(0, -2)),
       sizeUnit(buildSizeFormatted),
-      // on disk size uses the unix du command, which is not supported on Windows
+      // on disk size uses `du`, which is not supported on Windows
       buildSizeOnDisk ? "\n --> size on disk:" : "",
       buildSizeOnDisk ? Number(buildOnDiskFormatted.slice(0, -2)) : "",
       buildSizeOnDisk ? sizeUnit(buildOnDiskFormatted) : "",

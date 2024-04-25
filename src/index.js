@@ -1,12 +1,22 @@
 #!/usr/bin/env node
-import { resolve } from "path";
-import { readdir, stat, readFile, appendFile, writeFile } from "fs/promises";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { gzip, brotliCompress } from "zlib";
-const compressGzip = promisify(gzip);
-const compressBrotli = promisify(brotliCompress);
-const execBash = promisify(exec);
+import { resolve } from "node:path";
+import {
+  readdir,
+  stat,
+  readFile,
+  appendFile,
+  writeFile,
+} from "node:fs/promises";
+import { promisify } from "node:util";
+import { exec as execSync } from "node:child_process";
+import {
+  gzip as gzipSync,
+  brotliCompress as brotliCompressSync,
+} from "node:zlib";
+
+const exec = promisify(execSync);
+const gzip = promisify(gzipSync);
+const brotliCompress = promisify(brotliCompressSync);
 
 /**
  * Format bytes to a human readable size.
@@ -19,7 +29,10 @@ const execBash = promisify(exec);
  */
 function formatBytes(bytes, decimals = 2, binary = false) {
   try {
-    if (!bytes) return "0 B";
+    if (!bytes) {
+      return "0 B";
+    }
+
     const k = binary ? 1024 : 1000;
     const n = Math.floor(
       binary ? Math.log10(bytes) / 3 : Math.log2(bytes) / 10,
@@ -110,7 +123,7 @@ const filterFilesByType = (files, type) =>
  */
 const getFileSizeGzip = (filePath) =>
   readFile(filePath)
-    .then(compressGzip)
+    .then(gzip)
     .then((output) => output.length)
     .catch((err) =>
       help(
@@ -131,7 +144,7 @@ const getFileSizeGzip = (filePath) =>
  */
 const getFileSizeBrotli = (filePath) =>
   readFile(filePath)
-    .then(compressBrotli)
+    .then(brotliCompress)
     .then((output) => output.length)
     .catch((err) =>
       help(
@@ -177,10 +190,10 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
     // sum of all file sizes
     const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
 
-    // the du command is not available on windows
+    // the `du` command is not available on windows
     const buildSizeOnDisk =
       process.platform !== "win32"
-        ? Number((await execBash(`du -sb ${build} | cut -f1`)).stdout.trim())
+        ? Number((await exec(`du -sb ${build} | cut -f1`)).stdout.trim())
         : NaN;
 
     const buildFileCount = buildFiles.length;
@@ -223,10 +236,12 @@ async function saveBuildSizes(buildSizes, outputPath) {
     try {
       version = JSON.parse(await readFile("package.json", "utf8")).version;
     } catch (err) {
-      if (err.code === "ENOENT" && err.path === "package.json")
+      if (err.code === "ENOENT" && err.path === "package.json") {
         console.warn(
-          "No package.json file found in the current working directory. The package version will not be specified.\n",
+          "No package.json file found in the current working directory.",
+          "The package version will not be specified.\n",
         );
+      }
     }
 
     const timestamp = new Intl.DateTimeFormat("default", {
@@ -246,7 +261,6 @@ async function saveBuildSizes(buildSizes, outputPath) {
 
     header.push("(File sizes in bytes)");
     const headerString = `${header.join(",")}\n`;
-    const rowString = `${row.join(",")}\n`;
 
     try {
       // write csv header if outfile doesn't exist
@@ -262,7 +276,9 @@ async function saveBuildSizes(buildSizes, outputPath) {
         );
       }
     }
+
     // append build size info to csv
+    const rowString = `${row.join(",")}\n`;
     await appendFile(outfile, rowString);
   } catch (err) {
     help(err, "\n\nError saving build sizes to CSV.");
@@ -279,7 +295,9 @@ async function saveBuildSizes(buildSizes, outputPath) {
 function help(...messages) {
   messages && console.error(...messages);
   console.error(
-    "\nAdd the -h or --help flag for usage information when on the CLI.\n\nRead the documentation for assistance with the exported functions:\n  https://benelan.github.io/build-sizes/global.html\n",
+    "\nAdd the -h or --help flag for usage information when on the CLI.\n",
+    "\nRead the documentation for assistance with the exported functions:",
+    "\nhttps://benelan.github.io/build-sizes/global.html",
   );
   process.exit(1);
 }
