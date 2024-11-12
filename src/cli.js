@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
+import { formatBytes, getBuildSizes, help, saveBuildSizes } from "./index.js";
 
 const FLAG_INFO = {
   loader: {

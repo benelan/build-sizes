@@ -1,17 +1,18 @@
 #!/usr/bin/env node
-import { resolve } from "node:path";
-import {
-  readdir,
-  stat,
-  readFile,
-  appendFile,
-  writeFile,
-} from "node:fs/promises";
-import { promisify } from "node:util";
+
 import { exec as execSync } from "node:child_process";
 import {
-  gzip as gzipSync,
+  appendFile,
+  readdir,
+  readFile,
+  stat,
+  writeFile,
+} from "node:fs/promises";
+import { resolve } from "node:path";
+import { promisify } from "node:util";
+import {
   brotliCompress as brotliCompressSync,
+  gzip as gzipSync,
 } from "node:zlib";
 
 const exec = promisify(execSync);
@@ -324,12 +325,12 @@ function help(...messages) {
  */
 
 export {
-  getBuildSizes,
-  saveBuildSizes,
-  formatBytes,
-  getFiles,
-  getFileSizeGzip,
-  getFileSizeBrotli,
   filterFilesByType,
+  formatBytes,
+  getBuildSizes,
+  getFiles,
+  getFileSizeBrotli,
+  getFileSizeGzip,
   help,
+  saveBuildSizes,
 };
