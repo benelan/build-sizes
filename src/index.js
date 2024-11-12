@@ -22,10 +22,10 @@ const brotliCompress = promisify(brotliCompressSync);
  * Format bytes to a human readable size.
  *
  * @since v2.1.0
- * @param {number} bytes - bytes to format
- * @param {number} [decimals] - decimal precision for rounding
- * @param {boolean} [binary] - binary or decimal unit conversion
- * @returns {string} human readable file size with units
+ * @param {number} bytes - The bytes to format.
+ * @param {number} [decimals] - The decimal precision for rounding.
+ * @param {boolean} [binary] - The binary or decimal unit conversion.
+ * @returns {string} The human readable file size with units.
  */
 function formatBytes(bytes, decimals = 2, binary = false) {
   try {
@@ -57,11 +57,12 @@ function formatBytes(bytes, decimals = 2, binary = false) {
 }
 
 /**
- * Find sizes of all files in a directory (recursive).
+ * Asynchronously retrieves all files from a specified directory and its subdirectories.
  *
  * @since v2.1.0
- * @param {string} parentDir - path to the directory containing the files
- * @returns {Promise<File[]>} all files in the directory and subdirectories
+ * @param {string} parentDir - The path to the parent directory to search for files.
+ * @returns {Promise<Array<File[]>} A promise that resolves to an array of file objects, each containing the file's name, path, and size.
+ * @throws Will throw an error if the directory cannot be read or if any other error occurs during the file retrieval process.
  */
 async function getFiles(parentDir) {
   try {
@@ -98,9 +99,9 @@ async function getFiles(parentDir) {
  * Filter files by filetype. Use {@link getFiles} to retrieve the build files.
  *
  * @since v2.2.0
- * @param {File[]} files - files to filter
- * @param {string} type - file type, e.g. "js", "tsx", etc.
- * @returns {File[]} files filtered by file type
+ * @param {File[]} files - The files to filter.
+ * @param {string} type - The file type, e.g. "js", "css", etc.
+ * @returns {File[]} The files filtered by file type.
  */
 const filterFilesByType = (files, type) =>
   files.filter((file) => new RegExp(`.${type}$`, "i").test(file.name));
@@ -109,8 +110,8 @@ const filterFilesByType = (files, type) =>
  * Compress a file using gzip and return the size.
  *
  * @since v3.0.0
- * @param {string} filePath - path of the file to compress
- * @returns {Promise<number>} gzip-compressed byte size using the default
+ * @param {string} filePath - The path of the file to compress.
+ * @returns {Promise<number>} The gzip-compressed byte size using the default.
  *   [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
 const getFileSizeGzip = (filePath) =>
@@ -130,8 +131,8 @@ const getFileSizeGzip = (filePath) =>
  * Compress a file using brotli and return the size.
  *
  * @since v3.0.0
- * @param {string} filePath - path of the file to compress
- * @returns {Promise<number>} brotli-compressed byte size using the default
+ * @param {string} filePath - The path of the file to compress.
+ * @returns {Promise<number>} The brotli-compressed byte size using the default.
  *   [zlib]{@link https://nodejs.org/api/zlib.html#brotli-constants} options
  */
 const getFileSizeBrotli = (filePath) =>
@@ -150,9 +151,9 @@ const getFileSizeBrotli = (filePath) =>
 /**
  * Determine metrics related to an application's build size.
  *
- * @param {string} buildPath - path to the build directory
- * @param {string} [bundleFileType] - file type of bundle, e.g. "js", "css", etc.
- * @returns {Promise<BuildSizes>} build sizes
+ * @param {string} buildPath - The path to the build directory.
+ * @param {string} [bundleFileType] - The file type of bundle, e.g. "js", "css", etc.
+ * @returns {Promise<BuildSizes>} The build sizes.
  */
 async function getBuildSizes(buildPath, bundleFileType = "js") {
   try {
@@ -217,8 +218,8 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
  * tracking build sizes over time, e.g., in a CI/CD pipeline.
  *
  * @since v3.0.0
- * @param {BuildSizes} buildSizes - build sizes that will be saved to CSV
- * @param {string} outputPath - path of the output file, e.g. build/size.csv
+ * @param {BuildSizes} buildSizes - The build sizes that will be saved to CSV.
+ * @param {string} outputPath - The path of the output file, e.g. "build/size.csv".
  */
 async function saveBuildSizes(buildSizes, outputPath) {
   try {
@@ -282,7 +283,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
  *
  * @private
  * @since v3.0.0
- * @param  {...any} messages - info for stderr
+ * @param  {...any} messages - The info to print to stderr.
  */
 function help(...messages) {
   messages && console.error(...messages);
@@ -298,9 +299,9 @@ function help(...messages) {
  * Information about a file.
  *
  * @typedef {object} File
- * @property {string} name - file name with type
- * @property {string} path - absolute file path
- * @property {string} size - uncompressed file size
+ * @property {string} name - The file name with type.
+ * @property {string} path - The absolute file path.
+ * @property {string} size - The uncompressed file size.
  * @see {@link getFiles}
  * @see {@link getFileSizeBrotli}
  * @see {@link getFileSizeGzip}
@@ -311,13 +312,13 @@ function help(...messages) {
  * Information about an application's build sizes.
  *
  * @typedef {object} BuildSizes
- * @property {string} mainBundleName - name of the largest bundle size by type
- * @property {number} mainBundleSize - byte size of the largest bundle file by type
- * @property {number} mainBundleSizeGzip - gzip-compressed byte size of the main bundle file
- * @property {number} mainBundleSizeBrotli - brotli-compressed byte size of the main bundle file
- * @property {number} buildSize - byte size of all files in the build directory
- * @property {number} buildSizeOnDisk -  on-disk size in bytes of the build directory. Not available on Windows.
- * @property {number} buildFileCount - count of all files in the build directory
+ * @property {string} mainBundleName - The name of the largest bundle size by type.
+ * @property {number} mainBundleSize - The byte size of the largest bundle file by type.
+ * @property {number} mainBundleSizeGzip - The gzip-compressed byte size of the main bundle file.
+ * @property {number} mainBundleSizeBrotli - The brotli-compressed byte size of the main bundle file.
+ * @property {number} buildSize - The byte size of all files in the build directory.
+ * @property {number} buildSizeOnDisk - The on-disk size in bytes of the build directory. Not available on Windows.
+ * @property {number} buildFileCount - The count of all files in the build directory.
  * @see {@link getBuildSizes}
  * @see {@link saveBuildSizes}
  */

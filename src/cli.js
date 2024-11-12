@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { getBuildSizes, saveBuildSizes, formatBytes, help } from "./index.js";
 
 const FLAG_INFO = {
@@ -179,8 +180,8 @@ const underline = (text) => `\x1b[4m${text}\x1b[0m`;
  * Parse CLI arguments for option flags.
  *
  * @private
- * @param {Array<string>} args - command line arguments from node
- * @returns {Object.<string>} - flags (as keys) and their values
+ * @param {Array<string>} args - The command line arguments from node.
+ * @returns {Object.<string>} - The flags (as keys) and their values.
  */
 function parseOptions(args) {
   const options = {};
@@ -202,7 +203,7 @@ function parseOptions(args) {
  *
  * @private
  * @since v3.0.0
- * @returns CLI help message
+ * @returns The CLI help message.
  * */
 function getUsageMessage() {
   // parse options help message from FLAG_INFO object
