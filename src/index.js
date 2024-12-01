@@ -61,36 +61,37 @@ function formatBytes(bytes, decimals = 2, binary = false) {
  * Asynchronously retrieves all files from a specified directory and its subdirectories.
  *
  * @since v2.1.0
- * @param {string} parentDir - The path to the parent directory to search for files.
+ * @param {string} directory - The path to the parent directory to search for files.
  * @returns {Promise<Array<File[]>} A promise that resolves to an array of file objects, each containing the file's name, path, and size.
  * @throws Will throw an error if the directory cannot be read or if any other error occurs during the file retrieval process.
  */
-async function getFiles(parentDir) {
+async function getFiles(directory) {
   try {
-    const files = [];
-    const entries = await readdir(parentDir, {
+    const entries = await readdir(directory, {
       withFileTypes: true,
       recursive: true,
     });
 
-    for (const dirent of entries) {
-      if (dirent.isFile()) {
-        const itemPath = resolve(dirent.path, dirent.name);
-        const { size } = await stat(itemPath);
-        files.push({ name: dirent.name, path: itemPath, size });
-      }
-    }
+    const files = await Promise.all(
+      entries
+        .filter((dirent) => dirent.isFile())
+        .map(async (dirent) => {
+          const path = resolve(dirent.parentPath, dirent.name);
+          const { size } = await stat(path);
+          return { name: dirent.name, path, size };
+        }),
+    );
 
-    return Promise.all(files);
+    return files;
   } catch (err) {
     if (err.code === "ENOENT") {
-      help("Error: Could not find build at specified path:\n   ", parentDir);
+      help("Error: Could not find build at specified path:\n   ", directory);
     } else {
       help(
         err,
         "\n\nOccurred while finding build files.",
         "Double check the file path:\n   ",
-        parentDir,
+        directory,
       );
     }
   }
@@ -101,7 +102,7 @@ async function getFiles(parentDir) {
  *
  * @since v2.2.0
  * @param {File[]} files - The files to filter.
- * @param {string} type - The file type, e.g. "js", "css", etc.
+ * @param {string} type - The file type (extension), e.g. "js", "css", etc.
  * @returns {File[]} The files filtered by file type.
  */
 const filterFilesByType = (files, type) =>
@@ -153,33 +154,27 @@ const getFileSizeBrotli = (filePath) =>
  * Determine metrics related to an application's build size.
  *
  * @param {string} buildPath - The path to the build directory.
- * @param {string} [bundleFileType] - The file type of bundle, e.g. "js", "css", etc.
+ * @param {string} [fileType] - The file type of bundle, e.g. "js", "css", etc.
  * @returns {Promise<BuildSizes>} The build sizes.
  */
-async function getBuildSizes(buildPath, bundleFileType = "js") {
+async function getBuildSizes(buildPath, fileType = "js") {
   try {
     const build = resolve(process.cwd(), buildPath);
     const buildFiles = await getFiles(build);
-    const filteredBuildFiles = filterFilesByType(buildFiles, bundleFileType);
+    const filteredBuildFiles = filterFilesByType(buildFiles, fileType);
 
-    // the file with the largest size by type
-    const mainBundleFile = filteredBuildFiles.length
-      ? filteredBuildFiles.reduce((max, file) =>
-          max.size > file.size ? max : file,
-        )
-      : null;
+    if (!filteredBuildFiles.length) {
+      throw new Error("Unable to find the specified build files.");
+    }
 
-    // the largest file size by type
-    const mainBundleSize = mainBundleFile ? mainBundleFile.size : 0;
-    const mainBundleName = mainBundleFile ? mainBundleFile.name : "Not found";
+    const mainBundleFile = filteredBuildFiles.reduce((max, file) =>
+      max.size > file.size ? max : file,
+    );
 
-    // main bundle size compressed using gzip and brotli
-    const mainBundleSizeGzip = mainBundleFile
-      ? await getFileSizeGzip(mainBundleFile.path)
-      : 0;
-    const mainBundleSizeBrotli = mainBundleFile
-      ? await getFileSizeBrotli(mainBundleFile.path)
-      : 0;
+    const [mainBundleSizeGzip, mainBundleSizeBrotli] = await Promise.all([
+      getFileSizeGzip(mainBundleFile.path),
+      getFileSizeBrotli(mainBundleFile.path),
+    ]);
 
     // sum of all file sizes
     const buildSize = buildFiles.reduce((count, file) => count + file.size, 0);
@@ -190,16 +185,14 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
         ? Number((await exec(`du -sb ${build} | cut -f1`)).stdout.trim())
         : NaN;
 
-    const buildFileCount = buildFiles.length;
-
     return {
-      mainBundleName,
-      mainBundleSize,
-      mainBundleSizeGzip,
-      mainBundleSizeBrotli,
       buildSize,
       buildSizeOnDisk,
-      buildFileCount,
+      mainBundleSizeBrotli,
+      mainBundleSizeGzip,
+      buildFileCount: buildFiles.length,
+      mainBundleName: mainBundleFile.name,
+      mainBundleSize: mainBundleFile.size,
     };
   } catch (err) {
     help(
@@ -207,9 +200,9 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
       "\n\nOccurred while getting build sizes.",
       "Double check the inputs:",
       "\n    build path:",
-      resolve(buildPath),
+      resolve(process.cwd(), buildPath),
       "\n    bundle filetype:",
-      bundleFileType,
+      fileType,
     );
   }
 }
@@ -220,11 +213,11 @@ async function getBuildSizes(buildPath, bundleFileType = "js") {
  *
  * @since v3.0.0
  * @param {BuildSizes} buildSizes - The build sizes that will be saved to CSV.
- * @param {string} outputPath - The path of the output file, e.g. "build/size.csv".
+ * @param {string} filePath - The path of the output file, e.g. "build/size.csv".
  */
-async function saveBuildSizes(buildSizes, outputPath) {
+async function saveBuildSizes(buildSizes, filePath) {
   try {
-    const outfile = resolve(outputPath);
+    const outfile = resolve(filePath);
     let version = "";
 
     try {
@@ -266,7 +259,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
           err,
           "\n\nOccurred while saving build sizes.",
           "Double check the output path:\n   ",
-          resolve(outputPath),
+          resolve(filePath),
         );
       }
     }
@@ -284,7 +277,7 @@ async function saveBuildSizes(buildSizes, outputPath) {
  *
  * @private
  * @since v3.0.0
- * @param  {...any} messages - The info to print to stderr.
+ * @param  {...any} messages? - The info to print to stderr.
  */
 function help(...messages) {
   messages && console.error(...messages);
